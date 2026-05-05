@@ -13,11 +13,14 @@ function Dashboard() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/notes', {
+      const response = await fetch(
+        'https://securenotes-backend-jcor.onrender.com/api/notes',
+        {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+        }
+      )
 
       const data = await response.json()
 
@@ -40,14 +43,17 @@ function Dashboard() {
     setMessage('')
 
     try {
-      const response = await fetch('http://localhost:5000/api/notes', {
+      const response = await fetch(
+        'https://securenotes-backend-jcor.onrender.com/api/notes',
+        {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ title, content }),
-      })
+        }
+      )
 
       const data = await response.json()
 
@@ -67,12 +73,15 @@ function Dashboard() {
     setMessage('')
 
     try {
-      const response = await fetch(`http://localhost:5000/api/notes/${id}`, {
+      const response = await fetch(
+        `https://securenotes-backend-jcor.onrender.com/api/notes/${id}`,
+        {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+        }
+      )
 
       const data = await response.json()
 
@@ -102,14 +111,17 @@ function Dashboard() {
     setMessage('')
 
     try {
-      const response = await fetch(`http://localhost:5000/api/notes/${note._id}`, {
+      const response = await fetch(
+        `https://securenotes-backend-jcor.onrender.com/api/notes/${note._id}`,
+        {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ title: nextTitle, content: nextContent }),
-      })
+        }
+      )
 
       const data = await response.json()
 
