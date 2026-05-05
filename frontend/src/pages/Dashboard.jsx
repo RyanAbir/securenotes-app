@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 function Dashboard() {
   const token = localStorage.getItem('token')
@@ -145,7 +146,15 @@ function Dashboard() {
   }
 
   if (!token) {
-    return <p>Please login</p>
+    return (
+      <div style={{ maxWidth: '420px', margin: '40px auto', padding: '24px' }}>
+        <h1>Please login</h1>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Link to="/login">Login</Link>
+          <Link to="/register">Register</Link>
+        </div>
+      </div>
+    )
   }
 
   return (
