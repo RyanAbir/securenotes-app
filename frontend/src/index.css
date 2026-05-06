@@ -217,6 +217,10 @@ code {
   gap: 16px;
 }
 
+.dashboard-search {
+  margin-bottom: 20px;
+}
+
 .dashboard-field {
   display: flex;
   flex-direction: column;
@@ -312,12 +316,49 @@ code {
 }
 
 .note-card-body h2 {
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 
 .note-card-body p {
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.note-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.note-badge {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.note-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-size: 13px;
+  line-height: 1;
 }
 
 .note-card-actions {

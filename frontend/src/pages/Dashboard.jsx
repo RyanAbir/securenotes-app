@@ -1,13 +1,23 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const parseTags = (value) =>
+  value
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+
+const formatTags = (tags = []) => tags.join(', ')
+
 function Dashboard() {
   const token = localStorage.getItem('token')
   const [notes, setNotes] = useState([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [tags, setTags] = useState('')
   const navigate = useNavigate()
 
   const fetchNotes = async () => {
@@ -33,7 +43,7 @@ function Dashboard() {
         throw new Error(data.message || 'Failed to fetch notes')
       }
 
-      setNotes(data)
+      setNotes(Array.isArray(data) ? data : [])
     } catch (error) {
       setMessage(error.message)
     } finally {
@@ -58,7 +68,7 @@ function Dashboard() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify({ title, content, tags: parseTags(tags) }),
         }
       )
 
@@ -70,6 +80,7 @@ function Dashboard() {
 
       setTitle('')
       setContent('')
+      setTags('')
       setNotes((currentNotes) => [data, ...currentNotes])
     } catch (error) {
       setMessage(error.message)
@@ -121,6 +132,15 @@ function Dashboard() {
       return
     }
 
+    const nextTags = window.prompt(
+      'Enter tags as comma-separated values',
+      formatTags(note.tags || [])
+    )
+
+    if (nextTags === null) {
+      return
+    }
+
     setMessage('')
 
     try {
@@ -132,7 +152,12 @@ function Dashboard() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ title: nextTitle, content: nextContent }),
+        body: JSON.stringify({
+          title: nextTitle,
+          content: nextContent,
+          tags: parseTags(nextTags),
+          pinned: Boolean(note.pinned),
+        }),
         }
       )
 
@@ -152,10 +177,60 @@ function Dashboard() {
     }
   }
 
+  const handleTogglePinned = async (note) => {
+    setMessage('')
+
+    try {
+      const response = await fetch(
+        `https://securenotes-backend-jcor.onrender.com/api/notes/${note._id}`,
+        {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: note.title,
+          content: note.content,
+          tags: Array.isArray(note.tags) ? note.tags : [],
+          pinned: !note.pinned,
+        }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update pinned status')
+      }
+
+      setNotes((currentNotes) =>
+        currentNotes.map((currentNote) =>
+          currentNote._id === note._id ? data : currentNote
+        )
+      )
+    } catch (error) {
+      setMessage(error.message)
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     navigate('/login', { replace: true })
   }
+
+  const filteredNotes = notes.filter((note) => {
+    const query = searchTerm.trim().toLowerCase()
+
+    if (!query) {
+      return true
+    }
+
+    const titleText = (note.title || '').toLowerCase()
+    const contentText = (note.content || '').toLowerCase()
+
+    return titleText.includes(query) || contentText.includes(query)
+  })
 
   return (
     <div className="dashboard-page">
@@ -213,6 +288,15 @@ function Dashboard() {
                   rows="6"
                 />
               </label>
+              <label className="dashboard-field">
+                <span>Tags</span>
+                <input
+                  type="text"
+                  placeholder="work, personal, urgent"
+                  value={tags}
+                  onChange={(event) => setTags(event.target.value)}
+                />
+              </label>
               <button type="submit" className="dashboard-button dashboard-button-primary">
                 Add Note
               </button>
@@ -222,8 +306,18 @@ function Dashboard() {
           <section className="dashboard-panel dashboard-notes-panel">
             <div className="dashboard-section-header">
               <h2>Your notes</h2>
-              <p>{notes.length} saved note{notes.length === 1 ? '' : 's'}</p>
+              <p>{filteredNotes.length} visible note{filteredNotes.length === 1 ? '' : 's'}</p>
             </div>
+
+            <label className="dashboard-field dashboard-search">
+              <span>Search notes</span>
+              <input
+                type="search"
+                placeholder="Search by title or content"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+            </label>
 
             {loading ? (
               <div className="dashboard-state">
@@ -233,15 +327,38 @@ function Dashboard() {
               <div className="dashboard-state">
                 <p>You do not have any notes yet. Create your first note to get started.</p>
               </div>
+            ) : filteredNotes.length === 0 ? (
+              <div className="dashboard-state">
+                <p>No notes match your current search.</p>
+              </div>
             ) : (
               <div className="notes-grid">
-                {notes.map((note) => (
+                {filteredNotes.map((note) => (
                   <article key={note._id} className="note-card">
                     <div className="note-card-body">
-                      <h2>{note.title}</h2>
+                      <div className="note-card-header">
+                        <h2>{note.title}</h2>
+                        {note.pinned ? <span className="note-badge">Pinned</span> : null}
+                      </div>
                       <p>{note.content}</p>
+                      {Array.isArray(note.tags) && note.tags.length > 0 ? (
+                        <div className="note-tags">
+                          {note.tags.map((tag) => (
+                            <span key={`${note._id}-${tag}`} className="note-tag">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                     <div className="note-card-actions">
+                      <button
+                        type="button"
+                        className="dashboard-button dashboard-button-secondary"
+                        onClick={() => handleTogglePinned(note)}
+                      >
+                        {note.pinned ? 'Unpin' : 'Pin'}
+                      </button>
                       <button
                         type="button"
                         className="dashboard-button dashboard-button-secondary"
