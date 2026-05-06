@@ -12,20 +12,21 @@ const app = express();
 
 connectDB();
 
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "http://localhost:5173",
-];
+const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:5173"].filter(
+  Boolean
+);
 
 app.use(helmet());
 app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+        return callback(null, true);
       }
+
+      const error = new Error("Origin not allowed");
+      error.status = 403;
+      return callback(error);
     },
     credentials: true,
   })
@@ -43,6 +44,18 @@ app.get("/api/protected", protect, (req, res) => {
   res.json({
     message: "Protected route working",
     userId: req.user,
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  return res.status(err.status || 500).json({
+    message: err.message || "Server error",
   });
 });
 
