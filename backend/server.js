@@ -12,18 +12,22 @@ const app = express();
 
 connectDB();
 
-const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:5173"].filter(Boolean);
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+];
 
 app.use(helmet());
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
       }
-
-      return callback(new Error("Not allowed by CORS"));
     },
+    credentials: true,
   })
 );
 app.use(express.json());
