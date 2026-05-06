@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 function Dashboard() {
   const token = localStorage.getItem('token')
@@ -7,6 +7,7 @@ function Dashboard() {
   const [message, setMessage] = useState('')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const navigate = useNavigate()
 
   const fetchNotes = async () => {
     if (!token) {
@@ -142,19 +143,7 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
-    window.location.reload()
-  }
-
-  if (!token) {
-    return (
-      <div style={{ maxWidth: '420px', margin: '40px auto', padding: '24px' }}>
-        <h1>Please login</h1>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
-        </div>
-      </div>
-    )
+    navigate('/login', { replace: true })
   }
 
   return (

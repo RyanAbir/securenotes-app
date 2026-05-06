@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  const navigate = useNavigate()
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -28,8 +30,13 @@ function Register() {
         throw new Error(data.message || 'Registration failed')
       }
 
-      localStorage.setItem('token', data.token)
-      setMessage('Registration successful')
+      if (data.token) {
+        localStorage.setItem('token', data.token)
+        navigate('/dashboard', { replace: true })
+        return
+      }
+
+      navigate('/login', { replace: true })
     } catch (error) {
       setMessage(error.message)
     }
