@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_URL
+
 function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -14,7 +16,7 @@ function Register() {
 
     try {
       const response = await fetch(
-        'https://securenotes-backend-jcor.onrender.com/api/auth/register',
+        `${API_URL}/api/auth/register`,
         {
         method: 'POST',
         headers: {

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_URL
+
 const parseTags = (value) =>
   value
     .split(',')
@@ -29,7 +31,7 @@ function Dashboard() {
 
     try {
       const response = await fetch(
-        'https://securenotes-backend-jcor.onrender.com/api/notes',
+        `${API_URL}/api/notes`,
         {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -61,7 +63,7 @@ function Dashboard() {
 
     try {
       const response = await fetch(
-        'https://securenotes-backend-jcor.onrender.com/api/notes',
+        `${API_URL}/api/notes`,
         {
         method: 'POST',
         headers: {
@@ -98,7 +100,7 @@ function Dashboard() {
 
     try {
       const response = await fetch(
-        `https://securenotes-backend-jcor.onrender.com/api/notes/${id}`,
+        `${API_URL}/api/notes/${id}`,
         {
         method: 'DELETE',
         headers: {
@@ -145,7 +147,7 @@ function Dashboard() {
 
     try {
       const response = await fetch(
-        `https://securenotes-backend-jcor.onrender.com/api/notes/${note._id}`,
+        `${API_URL}/api/notes/${note._id}`,
         {
         method: 'PUT',
         headers: {
@@ -182,7 +184,7 @@ function Dashboard() {
 
     try {
       const response = await fetch(
-        `https://securenotes-backend-jcor.onrender.com/api/notes/${note._id}`,
+        `${API_URL}/api/notes/${note._id}`,
         {
         method: 'PUT',
         headers: {
