@@ -1,8 +1,19 @@
 const Note = require("../models/Note");
 
+const normalizeTags = (tags) => {
+  if (!Array.isArray(tags)) {
+    return undefined;
+  }
+
+  return tags.filter((tag) => typeof tag === "string");
+};
+
 const getNotes = async (req, res) => {
   try {
-    const notes = await Note.find({ user: req.user });
+    const notes = await Note.find({ user: req.user }).sort({
+      pinned: -1,
+      createdAt: -1,
+    });
     return res.json(notes);
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -11,17 +22,29 @@ const getNotes = async (req, res) => {
 
 const createNote = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, tags, pinned } = req.body;
 
     if (!title || !content) {
       return res.status(400).json({ message: "Please provide title and content" });
     }
 
-    const note = await Note.create({
+    const noteData = {
       user: req.user,
       title,
       content,
-    });
+    };
+
+    const normalizedTags = normalizeTags(tags);
+
+    if (normalizedTags !== undefined) {
+      noteData.tags = normalizedTags;
+    }
+
+    if (typeof pinned === "boolean") {
+      noteData.pinned = pinned;
+    }
+
+    const note = await Note.create(noteData);
 
     return res.status(201).json(note);
   } catch (error) {
@@ -32,7 +55,7 @@ const createNote = async (req, res) => {
 const updateNote = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body;
+    const { title, content, tags, pinned } = req.body;
 
     const note = await Note.findById(id);
 
@@ -44,8 +67,23 @@ const updateNote = async (req, res) => {
       return res.status(401).json({ message: "Not authorized" });
     }
 
-    note.title = title || note.title;
-    note.content = content || note.content;
+    if (title !== undefined) {
+      note.title = title;
+    }
+
+    if (content !== undefined) {
+      note.content = content;
+    }
+
+    const normalizedTags = normalizeTags(tags);
+
+    if (normalizedTags !== undefined) {
+      note.tags = normalizedTags;
+    }
+
+    if (typeof pinned === "boolean") {
+      note.pinned = pinned;
+    }
 
     const updatedNote = await note.save();
 
