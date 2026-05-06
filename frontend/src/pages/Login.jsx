@@ -14,21 +14,26 @@ function Login() {
     setMessage('')
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/auth/login`,
-        {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-        }
-      )
-
-      const data = await response.json()
+      })
+      const text = await response.text()
+      const data = text ? JSON.parse(text) : {}
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
+        throw new Error(
+          typeof data.message === 'string' && data.message
+            ? data.message
+            : 'Login failed'
+        )
+      }
+
+      if (!data.token) {
+        throw new Error('Login failed: token missing')
       }
 
       localStorage.setItem('token', data.token)

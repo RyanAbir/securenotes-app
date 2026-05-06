@@ -15,21 +15,22 @@ function Register() {
     setMessage('')
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/auth/register`,
-        {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ name, email, password }),
-        }
-      )
-
-      const data = await response.json()
+      })
+      const text = await response.text()
+      const data = text ? JSON.parse(text) : {}
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed')
+        throw new Error(
+          typeof data.message === 'string' && data.message
+            ? data.message
+            : 'Registration failed'
+        )
       }
 
       if (data.token) {
