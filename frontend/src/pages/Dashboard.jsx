@@ -5,6 +5,7 @@ function Dashboard() {
   const token = localStorage.getItem('token')
   const [notes, setNotes] = useState([])
   const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(true)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const navigate = useNavigate()
@@ -13,6 +14,8 @@ function Dashboard() {
     if (!token) {
       return
     }
+
+    setLoading(true)
 
     try {
       const response = await fetch(
@@ -33,6 +36,8 @@ function Dashboard() {
       setNotes(data)
     } catch (error) {
       setMessage(error.message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -147,62 +152,112 @@ function Dashboard() {
   }
 
   return (
-    <div style={{ maxWidth: '420px', margin: '40px auto', padding: '24px' }}>
-      <h1>Dashboard</h1>
-      <button type="button" onClick={handleLogout}>
-        Logout
-      </button>
-      {message ? <p>{message}</p> : null}
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-          marginTop: '20px',
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Title"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          required
-        />
-        <textarea
-          placeholder="Content"
-          value={content}
-          onChange={(event) => setContent(event.target.value)}
-          required
-          rows="4"
-        />
-        <button type="submit">Add Note</button>
-      </form>
-      <ul style={{ padding: 0, listStyle: 'none' }}>
-        {notes.map((note) => (
-          <li
-            key={note._id}
-            style={{ border: '1px solid #ccc', marginTop: '12px', padding: '12px' }}
-          >
-            <h2 style={{ margin: '0 0 8px' }}>{note.title}</h2>
-            <p style={{ margin: 0 }}>{note.content}</p>
-            <button
-              type="button"
-              onClick={() => handleEdit(note)}
-              style={{ marginTop: '12px', marginRight: '8px' }}
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDelete(note._id)}
-              style={{ marginTop: '12px' }}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+    <div className="dashboard-page">
+      <header className="dashboard-nav">
+        <div>
+          <p className="dashboard-brand">SecureNotes</p>
+          <p className="dashboard-tagline">Private notes, available only after sign in.</p>
+        </div>
+        <button
+          type="button"
+          className="dashboard-button dashboard-button-secondary"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+      </header>
+
+      <main className="dashboard-main">
+        <section className="dashboard-hero">
+          <div>
+            <p className="dashboard-eyebrow">Dashboard</p>
+            <h1>Your secure workspace</h1>
+            <p className="dashboard-subtitle">
+              Capture notes quickly and manage them from one place.
+            </p>
+          </div>
+        </section>
+
+        {message ? <p className="dashboard-message">{message}</p> : null}
+
+        <section className="dashboard-grid">
+          <div className="dashboard-panel dashboard-form-panel">
+            <div className="dashboard-section-header">
+              <h2>Create a note</h2>
+              <p>Write something important and keep it organized.</p>
+            </div>
+            <form className="dashboard-form" onSubmit={handleSubmit}>
+              <label className="dashboard-field">
+                <span>Title</span>
+                <input
+                  type="text"
+                  placeholder="Weekly plan"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  required
+                />
+              </label>
+              <label className="dashboard-field">
+                <span>Content</span>
+                <textarea
+                  placeholder="Add your note details here"
+                  value={content}
+                  onChange={(event) => setContent(event.target.value)}
+                  required
+                  rows="6"
+                />
+              </label>
+              <button type="submit" className="dashboard-button dashboard-button-primary">
+                Add Note
+              </button>
+            </form>
+          </div>
+
+          <section className="dashboard-panel dashboard-notes-panel">
+            <div className="dashboard-section-header">
+              <h2>Your notes</h2>
+              <p>{notes.length} saved note{notes.length === 1 ? '' : 's'}</p>
+            </div>
+
+            {loading ? (
+              <div className="dashboard-state">
+                <p>Loading notes...</p>
+              </div>
+            ) : notes.length === 0 ? (
+              <div className="dashboard-state">
+                <p>You do not have any notes yet. Create your first note to get started.</p>
+              </div>
+            ) : (
+              <div className="notes-grid">
+                {notes.map((note) => (
+                  <article key={note._id} className="note-card">
+                    <div className="note-card-body">
+                      <h2>{note.title}</h2>
+                      <p>{note.content}</p>
+                    </div>
+                    <div className="note-card-actions">
+                      <button
+                        type="button"
+                        className="dashboard-button dashboard-button-secondary"
+                        onClick={() => handleEdit(note)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="dashboard-button dashboard-button-danger"
+                        onClick={() => handleDelete(note._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        </section>
+      </main>
     </div>
   )
 }
