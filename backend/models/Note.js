@@ -15,6 +15,14 @@ const noteSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    tags: {
+      type: [String],
+      default: [],
+    },
+    pinned: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
