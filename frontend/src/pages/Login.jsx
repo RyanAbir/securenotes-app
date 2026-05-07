@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { API_URL } from '../config/api'
@@ -7,11 +7,25 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+
+    if (token) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [navigate])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (isSubmitting) {
+      return
+    }
+
     setMessage('')
+    setIsSubmitting(true)
 
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
@@ -40,6 +54,8 @@ function Login() {
       navigate('/dashboard', { replace: true })
     } catch (error) {
       setMessage(error.message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -64,7 +80,9 @@ function Login() {
           onChange={(event) => setPassword(event.target.value)}
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Logging in...' : 'Login'}
+        </button>
       </form>
       {message ? <p>{message}</p> : null}
     </div>
