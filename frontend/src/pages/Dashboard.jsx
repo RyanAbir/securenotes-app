@@ -19,6 +19,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [notesError, setNotesError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedTag, setSelectedTag] = useState('all')
+  const [sortOrder, setSortOrder] = useState('newest')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [tags, setTags] = useState('')
@@ -222,18 +224,47 @@ function Dashboard() {
     navigate('/login', { replace: true })
   }
 
-  const filteredNotes = notes.filter((note) => {
+  const availableTags = Array.from(
+    new Set(
+      notes.flatMap((note) =>
+        Array.isArray(note.tags) ? note.tags.filter(Boolean) : []
+      )
+    )
+  ).sort((left, right) => left.localeCompare(right))
+
+  const visibleNotes = [...notes]
+    .filter((note) => {
     const query = searchTerm.trim().toLowerCase()
 
-    if (!query) {
-      return true
-    }
+      const matchesTag =
+        selectedTag === 'all' ||
+        (Array.isArray(note.tags) && note.tags.includes(selectedTag))
 
-    const titleText = (note.title || '').toLowerCase()
-    const contentText = (note.content || '').toLowerCase()
+      if (!matchesTag) {
+        return false
+      }
 
-    return titleText.includes(query) || contentText.includes(query)
-  })
+      if (!query) {
+        return true
+      }
+
+      const titleText = (note.title || '').toLowerCase()
+      const contentText = (note.content || '').toLowerCase()
+
+      return titleText.includes(query) || contentText.includes(query)
+    })
+    .sort((left, right) => {
+      const leftCreatedAt = new Date(left.createdAt || 0).getTime()
+      const rightCreatedAt = new Date(right.createdAt || 0).getTime()
+
+      if (sortOrder === 'oldest') {
+        return leftCreatedAt - rightCreatedAt
+      }
+
+      return rightCreatedAt - leftCreatedAt
+    })
+
+  const hasActiveFilters = Boolean(searchTerm.trim()) || selectedTag !== 'all'
 
   return (
     <div className="dashboard-page">
@@ -307,18 +338,48 @@ function Dashboard() {
           <section className="dashboard-panel dashboard-notes-panel">
             <div className="dashboard-section-header">
               <h2>Your notes</h2>
-              <p>{filteredNotes.length} visible note{filteredNotes.length === 1 ? '' : 's'}</p>
+              <p>{visibleNotes.length} visible note{visibleNotes.length === 1 ? '' : 's'}</p>
             </div>
 
-            <label className="dashboard-field dashboard-search">
-              <span>Search notes</span>
-              <input
-                type="search"
-                placeholder="Search by title or content"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-              />
-            </label>
+            <div className="dashboard-toolbar">
+              <label className="dashboard-field dashboard-search">
+                <span>Search notes</span>
+                <input
+                  type="search"
+                  placeholder="Search by title or content"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
+              </label>
+
+              <div className="dashboard-filters">
+                <label className="dashboard-field dashboard-select-field">
+                  <span>Filter by tag</span>
+                  <select
+                    value={selectedTag}
+                    onChange={(event) => setSelectedTag(event.target.value)}
+                  >
+                    <option value="all">All tags</option>
+                    {availableTags.map((tag) => (
+                      <option key={tag} value={tag}>
+                        {tag}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="dashboard-field dashboard-select-field">
+                  <span>Sort</span>
+                  <select
+                    value={sortOrder}
+                    onChange={(event) => setSortOrder(event.target.value)}
+                  >
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                  </select>
+                </label>
+              </div>
+            </div>
 
             {loading ? (
               <AppState
@@ -340,15 +401,19 @@ function Dashboard() {
                 title="No notes yet"
                 description="Create your first note to start building your private workspace."
               />
-            ) : filteredNotes.length === 0 ? (
+            ) : visibleNotes.length === 0 ? (
               <AppState
                 variant="empty"
-                title="No matching notes"
-                description="Try a different search term or clear the search to see all notes."
+                title={hasActiveFilters ? 'No notes match your filters' : 'No matching notes'}
+                description={
+                  hasActiveFilters
+                    ? 'Try a different search term or tag filter to see more notes.'
+                    : 'Try a different search term or clear the search to see all notes.'
+                }
               />
             ) : (
               <div className="notes-grid">
-                {filteredNotes.map((note) => (
+                {visibleNotes.map((note) => (
                   <article key={note._id} className="note-card">
                     <div className="note-card-body">
                       <div className="note-card-header">

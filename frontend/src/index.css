@@ -319,6 +319,18 @@ code {
   margin-bottom: 20px;
 }
 
+.dashboard-toolbar {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.dashboard-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .dashboard-field {
   display: flex;
   flex-direction: column;
@@ -332,6 +344,7 @@ code {
 }
 
 .dashboard-field input,
+.dashboard-field select,
 .dashboard-field textarea {
   width: 100%;
   border: 1px solid var(--border);
@@ -343,10 +356,15 @@ code {
 }
 
 .dashboard-field input:focus,
+.dashboard-field select:focus,
 .dashboard-field textarea:focus {
   outline: 2px solid transparent;
   border-color: var(--accent);
   box-shadow: 0 0 0 4px var(--accent-bg);
+}
+
+.dashboard-select-field select {
+  appearance: none;
 }
 
 .dashboard-button {
@@ -563,6 +581,10 @@ code {
   .dashboard-panel {
     padding: 18px;
     border-radius: 20px;
+  }
+
+  .dashboard-filters {
+    grid-template-columns: 1fr;
   }
 
   .note-card-actions {

@@ -2,7 +2,7 @@
 
 This file tracks the upgrade roadmap progress so we can keep changes scoped and know what is still left.
 
-## Phase 1 — UX Improvements
+## Phase 1 - UX Improvements
 
 ### Done
 - Auto redirect after login/register
@@ -18,20 +18,20 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - More consistent inline validation across auth and note forms
 - Additional empty states where needed
 
-## Phase 2 — Notes Features
+## Phase 2 - Notes Features
 
 ### Done
 - Search notes
 - Pin important notes
 - Tags / categories
-
-### Left
 - Filter by tags
 - Sort notes (newest / oldest)
+
+### Left
 - Favorite notes
 - Rich text editor
 
-## Phase 3 — Security Upgrade
+## Phase 3 - Security Upgrade
 
 ### Done
 - Environment-based API configuration in frontend
@@ -48,7 +48,7 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - Auto logout on token expiry
 - Stronger password rules beyond minimum length
 
-## Phase 4 — User Account Features
+## Phase 4 - User Account Features
 
 ### Done
 - None yet
@@ -60,7 +60,7 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - Change password
 - Delete account
 
-## Phase 5 — Backend Improvements
+## Phase 5 - Backend Improvements
 
 ### Done
 - Request validation middleware
@@ -71,7 +71,7 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - Cleaner folder structure
 - More consistent API responses
 
-## Phase 6 — Deployment & Production
+## Phase 6 - Deployment & Production
 
 ### Done
 - Frontend uses environment-based API URL
