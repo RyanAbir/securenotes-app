@@ -12,15 +12,21 @@ const app = express();
 
 connectDB();
 
-const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:5173"].filter(
-  Boolean
-);
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "https://securenotes-app.vercel.app",
+  "http://localhost:5173",
+]
+  .filter(Boolean)
+  .map((origin) => origin.replace(/\/+$/, ""));
 
 app.use(helmet());
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      const normalizedOrigin = origin?.replace(/\/+$/, "");
+
+      if (!normalizedOrigin || allowedOrigins.includes(normalizedOrigin)) {
         return callback(null, true);
       }
 
