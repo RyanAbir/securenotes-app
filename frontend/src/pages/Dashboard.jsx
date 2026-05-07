@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
+import AppState from '../components/AppState'
 import { API_URL } from '../config/api'
 
 const parseTags = (value) =>
@@ -14,8 +16,8 @@ const formatTags = (tags = []) => tags.join(', ')
 function Dashboard() {
   const token = localStorage.getItem('token')
   const [notes, setNotes] = useState([])
-  const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
+  const [notesError, setNotesError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -28,6 +30,7 @@ function Dashboard() {
     }
 
     setLoading(true)
+    setNotesError('')
 
     try {
       const response = await fetch(
@@ -47,7 +50,8 @@ function Dashboard() {
 
       setNotes(Array.isArray(data) ? data : [])
     } catch (error) {
-      setMessage(error.message)
+      setNotesError(error.message)
+      toast.error(error.message)
     } finally {
       setLoading(false)
     }
@@ -59,7 +63,6 @@ function Dashboard() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    setMessage('')
 
     try {
       const response = await fetch(
@@ -84,8 +87,9 @@ function Dashboard() {
       setContent('')
       setTags('')
       setNotes((currentNotes) => [data, ...currentNotes])
+      toast.success('Note created')
     } catch (error) {
-      setMessage(error.message)
+      toast.error(error.message)
     }
   }
 
@@ -95,8 +99,6 @@ function Dashboard() {
     if (!confirmed) {
       return
     }
-
-    setMessage('')
 
     try {
       const response = await fetch(
@@ -116,8 +118,9 @@ function Dashboard() {
       }
 
       setNotes((currentNotes) => currentNotes.filter((note) => note._id !== id))
+      toast.success('Note deleted')
     } catch (error) {
-      setMessage(error.message)
+      toast.error(error.message)
     }
   }
 
@@ -142,8 +145,6 @@ function Dashboard() {
     if (nextTags === null) {
       return
     }
-
-    setMessage('')
 
     try {
       const response = await fetch(
@@ -174,14 +175,13 @@ function Dashboard() {
           currentNote._id === note._id ? data : currentNote
         )
       )
+      toast.success('Note updated')
     } catch (error) {
-      setMessage(error.message)
+      toast.error(error.message)
     }
   }
 
   const handleTogglePinned = async (note) => {
-    setMessage('')
-
     try {
       const response = await fetch(
         `${API_URL}/api/notes/${note._id}`,
@@ -211,8 +211,9 @@ function Dashboard() {
           currentNote._id === note._id ? data : currentNote
         )
       )
+      toast.success(note.pinned ? 'Note unpinned' : 'Note pinned')
     } catch (error) {
-      setMessage(error.message)
+      toast.error(error.message)
     }
   }
 
@@ -260,8 +261,6 @@ function Dashboard() {
             </p>
           </div>
         </section>
-
-        {message ? <p className="dashboard-message">{message}</p> : null}
 
         <section className="dashboard-grid">
           <div className="dashboard-panel dashboard-form-panel">
@@ -322,17 +321,31 @@ function Dashboard() {
             </label>
 
             {loading ? (
-              <div className="dashboard-state">
-                <p>Loading notes...</p>
-              </div>
+              <AppState
+                variant="loading"
+                title="Loading notes"
+                description="Fetching your latest notes from the server."
+              />
+            ) : notesError ? (
+              <AppState
+                variant="error"
+                title="Could not load notes"
+                description={notesError}
+                actionLabel="Try again"
+                onAction={fetchNotes}
+              />
             ) : notes.length === 0 ? (
-              <div className="dashboard-state">
-                <p>You do not have any notes yet. Create your first note to get started.</p>
-              </div>
+              <AppState
+                variant="empty"
+                title="No notes yet"
+                description="Create your first note to start building your private workspace."
+              />
             ) : filteredNotes.length === 0 ? (
-              <div className="dashboard-state">
-                <p>No notes match your current search.</p>
-              </div>
+              <AppState
+                variant="empty"
+                title="No matching notes"
+                description="Try a different search term or clear the search to see all notes."
+              />
             ) : (
               <div className="notes-grid">
                 {filteredNotes.map((note) => (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
 import { API_URL } from '../config/api'
@@ -7,7 +8,6 @@ function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
 
@@ -25,7 +25,6 @@ function Register() {
       return
     }
 
-    setMessage('')
     setIsSubmitting(true)
 
     try {
@@ -49,13 +48,15 @@ function Register() {
 
       if (data.token) {
         localStorage.setItem('token', data.token)
+        toast.success('Registration successful')
         navigate('/dashboard', { replace: true })
         return
       }
 
+      toast.success('Registration successful. Please log in.')
       navigate('/login', { replace: true })
     } catch (error) {
-      setMessage(error.message)
+      toast.error(error.message)
     } finally {
       setIsSubmitting(false)
     }
@@ -93,7 +94,6 @@ function Register() {
           {isSubmitting ? 'Registering...' : 'Register'}
         </button>
       </form>
-      {message ? <p>{message}</p> : null}
     </div>
   )
 }

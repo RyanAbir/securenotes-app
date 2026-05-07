@@ -173,16 +173,6 @@ code {
   font-size: 18px;
 }
 
-.dashboard-message {
-  margin-bottom: 20px;
-  padding: 14px 16px;
-  border: 1px solid var(--accent-border);
-  border-radius: 16px;
-  background: var(--accent-bg);
-  text-align: left;
-  color: var(--text-h);
-}
-
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
@@ -288,13 +278,56 @@ code {
 }
 
 .dashboard-state {
+  min-height: 220px;
+}
+
+.app-state {
   display: grid;
-  place-items: center;
+  justify-items: center;
+  gap: 10px;
   min-height: 220px;
   padding: 24px;
   border: 1px dashed var(--border);
   border-radius: 18px;
   text-align: center;
+  align-content: center;
+}
+
+.app-state--error {
+  border-style: solid;
+  background: rgba(251, 113, 133, 0.08);
+}
+
+.app-state--loading,
+.app-state--info {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.app-state-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.app-state-title {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 20px;
+}
+
+.app-state-description {
+  max-width: 420px;
+}
+
+.app-state-action {
+  margin-top: 4px;
 }
 
 .notes-grid {
