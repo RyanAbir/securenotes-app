@@ -166,6 +166,7 @@ function Dashboard() {
           content: nextContent,
           tags: parseTags(nextTags),
           pinned: Boolean(note.pinned),
+          favorite: Boolean(note.favorite),
         }),
         }
       )
@@ -202,6 +203,7 @@ function Dashboard() {
           content: note.content,
           tags: Array.isArray(note.tags) ? note.tags : [],
           pinned: !note.pinned,
+          favorite: Boolean(note.favorite),
         }),
         }
       )
@@ -218,6 +220,43 @@ function Dashboard() {
         )
       )
       toast.success(note.pinned ? 'Note unpinned' : 'Note pinned')
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
+  const handleToggleFavorite = async (note) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/notes/${note._id}`,
+        {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: note.title,
+          content: note.content,
+          tags: Array.isArray(note.tags) ? note.tags : [],
+          pinned: Boolean(note.pinned),
+          favorite: !note.favorite,
+        }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update favorite status')
+      }
+
+      setNotes((currentNotes) =>
+        currentNotes.map((currentNote) =>
+          currentNote._id === note._id ? data : currentNote
+        )
+      )
+      toast.success(note.favorite ? 'Removed from favorites' : 'Added to favorites')
     } catch (error) {
       toast.error(error.message)
     }
@@ -422,7 +461,10 @@ function Dashboard() {
                     <div className="note-card-body">
                       <div className="note-card-header">
                         <h2>{note.title}</h2>
-                        {note.pinned ? <span className="note-badge">Pinned</span> : null}
+                        <div className="note-badges">
+                          {note.favorite ? <span className="note-badge note-badge-favorite">Favorite</span> : null}
+                          {note.pinned ? <span className="note-badge">Pinned</span> : null}
+                        </div>
                       </div>
                       <p>{note.content}</p>
                       {Array.isArray(note.tags) && note.tags.length > 0 ? (
@@ -436,6 +478,13 @@ function Dashboard() {
                       ) : null}
                     </div>
                     <div className="note-card-actions">
+                      <button
+                        type="button"
+                        className="dashboard-button dashboard-button-secondary"
+                        onClick={() => handleToggleFavorite(note)}
+                      >
+                        {note.favorite ? 'Unfavorite' : 'Favorite'}
+                      </button>
                       <button
                         type="button"
                         className="dashboard-button dashboard-button-secondary"

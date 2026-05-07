@@ -26,9 +26,9 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - Tags / categories
 - Filter by tags
 - Sort notes (newest / oldest)
+- Favorite notes
 
 ### Left
-- Favorite notes
 - Rich text editor
 
 ## Phase 3 - Security Upgrade

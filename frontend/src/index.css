@@ -491,6 +491,13 @@ code {
   margin-bottom: 10px;
 }
 
+.note-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .note-badge {
   flex-shrink: 0;
   padding: 6px 10px;
@@ -500,6 +507,11 @@ code {
   color: var(--text-h);
   font-size: 13px;
   font-weight: 600;
+}
+
+.note-badge-favorite {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
 }
 
 .note-tags {

@@ -22,7 +22,7 @@ const getNotes = async (req, res) => {
 
 const createNote = async (req, res) => {
   try {
-    const { title, content, tags, pinned } = req.body;
+    const { title, content, tags, pinned, favorite } = req.body;
 
     if (!title || !content) {
       return res.status(400).json({ message: "Please provide title and content" });
@@ -44,6 +44,10 @@ const createNote = async (req, res) => {
       noteData.pinned = pinned;
     }
 
+    if (typeof favorite === "boolean") {
+      noteData.favorite = favorite;
+    }
+
     const note = await Note.create(noteData);
 
     return res.status(201).json(note);
@@ -55,7 +59,7 @@ const createNote = async (req, res) => {
 const updateNote = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, tags, pinned } = req.body;
+    const { title, content, tags, pinned, favorite } = req.body;
 
     const note = await Note.findById(id);
 
@@ -83,6 +87,10 @@ const updateNote = async (req, res) => {
 
     if (typeof pinned === "boolean") {
       note.pinned = pinned;
+    }
+
+    if (typeof favorite === "boolean") {
+      note.favorite = favorite;
     }
 
     const updatedNote = await note.save();

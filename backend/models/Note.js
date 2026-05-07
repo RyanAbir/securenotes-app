@@ -23,6 +23,10 @@ const noteSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    favorite: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
