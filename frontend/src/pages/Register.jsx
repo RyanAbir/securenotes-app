@@ -6,6 +6,8 @@ import AuthLayout from '../components/AuthLayout'
 import { API_URL } from '../config/api'
 import { clearAuthSession, getStoredToken, isTokenExpired, storeAuthSession } from '../utils/auth'
 
+const strongPasswordRule = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
+
 const validateRegisterForm = ({ name, email, password, confirmPassword }) => {
   const errors = {}
 
@@ -19,8 +21,9 @@ const validateRegisterForm = ({ name, email, password, confirmPassword }) => {
 
   if (!password) {
     errors.password = 'Password is required'
-  } else if (password.length < 6) {
-    errors.password = 'Password must be at least 6 characters'
+  } else if (!strongPasswordRule.test(password)) {
+    errors.password =
+      'Use at least 8 characters with uppercase, lowercase, and a number'
   }
 
   if (!confirmPassword) {
@@ -222,7 +225,9 @@ function Register() {
           {getVisibleError('password') ? (
             <p className="auth-field-error">{getVisibleError('password')}</p>
           ) : (
-            <p className="auth-field-help">Use at least 6 characters.</p>
+            <p className="auth-field-help">
+              Use at least 8 characters with uppercase, lowercase, and a number.
+            </p>
           )}
         </label>
         <label className="auth-field">

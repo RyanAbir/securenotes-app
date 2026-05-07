@@ -11,6 +11,8 @@ SecureNotes is a full-stack MERN notes app with user authentication, JWT-protect
 - Edit notes
 - Delete notes
 - User-specific notes
+- Tag filtering, note sorting, favorites
+- Session expiry handling with auto logout
 
 ## Tech Stack
 
@@ -48,8 +50,15 @@ Create a `.env` file in `backend/` with:
 
 ```env
 MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=replace_with_a_long_random_secret_at_least_32_characters
+FRONTEND_URL=http://localhost:5173
+PORT=5000
 ```
+
+Security notes:
+- Use a long random `JWT_SECRET` in production.
+- Do not reuse development secrets in Render or other deployed environments.
+- `FRONTEND_URL` should match the deployed frontend origin exactly.
 
 Start the backend:
 
@@ -64,6 +73,20 @@ cd frontend
 npm install
 npm run dev
 ```
+
+Create a `.env` file in `frontend/` with:
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+Production environment notes:
+- Render backend should define:
+  - `MONGO_URI`
+  - `JWT_SECRET`
+  - `FRONTEND_URL`
+- Vercel frontend should define:
+  - `VITE_API_URL`
 
 ## Author
 
