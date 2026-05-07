@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import AppState from '../components/AppState'
 import { API_URL } from '../config/api'
+import { clearAuthSession, getStoredAuthUser, getStoredToken } from '../utils/auth'
 
 const parseTags = (value) =>
   value
@@ -14,8 +15,7 @@ const parseTags = (value) =>
 const formatTags = (tags = []) => tags.join(', ')
 
 function Dashboard() {
-  const token = localStorage.getItem('token')
-  const storedAuthUser = localStorage.getItem('authUser')
+  const token = getStoredToken()
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [notesError, setNotesError] = useState('')
@@ -27,14 +27,7 @@ function Dashboard() {
   const [tags, setTags] = useState('')
   const navigate = useNavigate()
 
-  let authUser = null
-
-  try {
-    authUser = storedAuthUser ? JSON.parse(storedAuthUser) : null
-  } catch {
-    authUser = null
-  }
-
+  const authUser = getStoredAuthUser()
   const userLabel = authUser?.name || authUser?.email || 'Signed in user'
 
   const fetchNotes = async () => {
@@ -231,8 +224,7 @@ function Dashboard() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('authUser')
+    clearAuthSession()
     navigate('/login', { replace: true })
   }
 

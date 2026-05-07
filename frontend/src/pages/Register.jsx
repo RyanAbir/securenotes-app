@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import AuthLayout from '../components/AuthLayout'
 import { API_URL } from '../config/api'
+import { clearAuthSession, getStoredToken, isTokenExpired, storeAuthSession } from '../utils/auth'
 
 const validateRegisterForm = ({ name, email, password, confirmPassword }) => {
   const errors = {}
@@ -79,9 +80,14 @@ function Register() {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
 
     if (token) {
+      if (isTokenExpired(token)) {
+        clearAuthSession()
+        return
+      }
+
       navigate('/dashboard', { replace: true })
     }
   }, [navigate])
@@ -135,14 +141,11 @@ function Register() {
       }
 
       if (data.token) {
-        localStorage.setItem('token', data.token)
-        localStorage.setItem(
-          'authUser',
-          JSON.stringify({
-            name: data.name || name,
-            email: data.email || email,
-          })
-        )
+        storeAuthSession({
+          token: data.token,
+          name: data.name || name,
+          email: data.email || email,
+        })
         toast.success('Registration successful')
         navigate('/dashboard', { replace: true })
         return

@@ -1,9 +1,12 @@
 import { Navigate } from 'react-router-dom'
 
-function ProtectedRoute({ children }) {
-  const token = localStorage.getItem('token')
+import { clearAuthSession, getStoredToken, isTokenExpired } from '../utils/auth'
 
-  if (!token) {
+function ProtectedRoute({ children }) {
+  const token = getStoredToken()
+
+  if (!token || isTokenExpired(token)) {
+    clearAuthSession()
     return <Navigate to="/login" replace />
   }
 

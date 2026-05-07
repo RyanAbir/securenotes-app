@@ -1,6 +1,7 @@
 import Dashboard from './pages/Dashboard'
 import { Toaster } from 'react-hot-toast'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import AuthSessionManager from './components/AuthSessionManager'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -8,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 function App() {
   return (
     <>
+      <AuthSessionManager />
       <Toaster
         position="top-right"
         toastOptions={{

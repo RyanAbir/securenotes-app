@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import AuthLayout from '../components/AuthLayout'
 import { API_URL } from '../config/api'
+import { clearAuthSession, getStoredToken, isTokenExpired, storeAuthSession } from '../utils/auth'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -12,9 +13,14 @@ function Login() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
 
     if (token) {
+      if (isTokenExpired(token)) {
+        clearAuthSession()
+        return
+      }
+
       navigate('/dashboard', { replace: true })
     }
   }, [navigate])
@@ -50,14 +56,11 @@ function Login() {
         throw new Error('Login failed: token missing')
       }
 
-      localStorage.setItem('token', data.token)
-      localStorage.setItem(
-        'authUser',
-        JSON.stringify({
-          name: data.name || '',
-          email: data.email || email,
-        })
-      )
+      storeAuthSession({
+        token: data.token,
+        name: data.name || '',
+        email: data.email || email,
+      })
       toast.success('Login successful')
       navigate('/dashboard', { replace: true })
     } catch (error) {

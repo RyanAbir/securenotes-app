@@ -40,12 +40,12 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - Stronger auth deployment configuration fixes
 - Confirm password on register
 - Inline password validation aligned with backend minimum length
+- Token expiration handling
+- Auto logout on token expiry
 
 ### Left
 - Strong JWT secret rotation/documentation
 - Hide internal error details consistently
-- Token expiration handling
-- Auto logout on token expiry
 - Stronger password rules beyond minimum length
 
 ## Phase 4 - User Account Features
