@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import AppState from '../components/AppState'
 import { API_URL } from '../config/api'
@@ -316,13 +316,18 @@ function Dashboard() {
           <p className="dashboard-brand">SecureNotes</p>
           <p className="dashboard-tagline">Signed in as {userLabel}</p>
         </div>
-        <button
-          type="button"
-          className="dashboard-button dashboard-button-secondary"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+        <div className="dashboard-nav-actions">
+          <Link className="dashboard-button dashboard-button-secondary" to="/profile">
+            Profile
+          </Link>
+          <button
+            type="button"
+            className="dashboard-button dashboard-button-secondary"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
       </header>
 
       <main className="dashboard-main">

@@ -28,6 +28,16 @@ export const storeAuthSession = ({ token, name = '', email = '' }) => {
   )
 }
 
+export const updateStoredAuthUser = ({ name = '', email = '' }) => {
+  localStorage.setItem(
+    AUTH_USER_KEY,
+    JSON.stringify({
+      name,
+      email,
+    })
+  )
+}
+
 export const getStoredAuthUser = () => {
   const storedAuthUser = localStorage.getItem(AUTH_USER_KEY)
 

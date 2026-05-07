@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 
+const accountRoutes = require("./routes/accountRoutes");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const noteRoutes = require("./routes/noteRoutes");
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes); // 🔥 THIS LINE
+app.use("/api/account", accountRoutes);
 app.use("/api/notes", noteRoutes);
 
 app.get("/api/protected", protect, (req, res) => {

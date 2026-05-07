@@ -53,12 +53,13 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 
 ### Done
 - Show logged-in username in UI
-
-### Left
 - Profile page
 - Update name/email
 - Change password
 - Delete account
+
+### Left
+- None in this phase
 
 ## Phase 5 - Backend Improvements
 
