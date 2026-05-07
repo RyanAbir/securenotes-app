@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
+import AuthLayout from '../components/AuthLayout'
 import { API_URL } from '../config/api'
 
 function Register() {
@@ -63,38 +64,49 @@ function Register() {
   }
 
   return (
-    <div style={{ maxWidth: '420px', margin: '40px auto', padding: '24px' }}>
-      <h1>Register</h1>
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-      >
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-        />
-        <button type="submit" disabled={isSubmitting}>
+    <AuthLayout
+      title="Register"
+      subtitle="Create an account to store your notes securely and keep them available across sessions."
+      helperText="Already have an account?"
+      helperLinkLabel="Login instead"
+      helperLinkTo="/login"
+    >
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <label className="auth-field">
+          <span>Name</span>
+          <input
+            type="text"
+            placeholder="Ryan Abir"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            required
+          />
+        </label>
+        <label className="auth-field">
+          <span>Email</span>
+          <input
+            type="email"
+            placeholder="info@example.com"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </label>
+        <label className="auth-field">
+          <span>Password</span>
+          <input
+            type="password"
+            placeholder="Create a secure password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+        </label>
+        <button type="submit" className="dashboard-button dashboard-button-primary" disabled={isSubmitting}>
           {isSubmitting ? 'Registering...' : 'Register'}
         </button>
       </form>
-    </div>
+    </AuthLayout>
   )
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
+import AuthLayout from '../components/AuthLayout'
 import { API_URL } from '../config/api'
 
 function Login() {
@@ -60,31 +61,39 @@ function Login() {
   }
 
   return (
-    <div style={{ maxWidth: '420px', margin: '40px auto', padding: '24px' }}>
-      <h1>Login</h1>
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-      >
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-        />
-        <button type="submit" disabled={isSubmitting}>
+    <AuthLayout
+      title="Login"
+      subtitle="Access your private notes and continue where you left off."
+      helperText="Need an account?"
+      helperLinkLabel="Register here"
+      helperLinkTo="/register"
+    >
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <label className="auth-field">
+          <span>Email</span>
+          <input
+            type="email"
+            placeholder="info@example.com"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </label>
+        <label className="auth-field">
+          <span>Password</span>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+        </label>
+        <button type="submit" className="dashboard-button dashboard-button-primary" disabled={isSubmitting}>
           {isSubmitting ? 'Logging in...' : 'Login'}
         </button>
       </form>
-    </div>
+    </AuthLayout>
   )
 }
 
