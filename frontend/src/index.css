@@ -194,6 +194,25 @@ code {
   box-shadow: 0 0 0 4px var(--accent-bg);
 }
 
+.auth-input-error {
+  border-color: #fb7185 !important;
+  box-shadow: 0 0 0 4px rgba(251, 113, 133, 0.12);
+}
+
+.auth-field-help,
+.auth-field-error {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.auth-field-help {
+  color: var(--text);
+}
+
+.auth-field-error {
+  color: #e11d48;
+}
+
 .auth-helper {
   margin-top: 18px;
   font-size: 14px;
