@@ -42,10 +42,10 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - Inline password validation aligned with backend minimum length
 - Token expiration handling
 - Auto logout on token expiry
+- Hide internal error details consistently
 
 ### Left
 - Strong JWT secret rotation/documentation
-- Hide internal error details consistently
 - Stronger password rules beyond minimum length
 
 ## Phase 4 - User Account Features

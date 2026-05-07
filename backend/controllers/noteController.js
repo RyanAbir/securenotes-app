@@ -8,7 +8,7 @@ const normalizeTags = (tags) => {
   return tags.filter((tag) => typeof tag === "string");
 };
 
-const getNotes = async (req, res) => {
+const getNotes = async (req, res, next) => {
   try {
     const notes = await Note.find({ user: req.user }).sort({
       pinned: -1,
@@ -16,11 +16,11 @@ const getNotes = async (req, res) => {
     });
     return res.json(notes);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 };
 
-const createNote = async (req, res) => {
+const createNote = async (req, res, next) => {
   try {
     const { title, content, tags, pinned, favorite } = req.body;
 
@@ -52,11 +52,11 @@ const createNote = async (req, res) => {
 
     return res.status(201).json(note);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 };
 
-const updateNote = async (req, res) => {
+const updateNote = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, content, tags, pinned, favorite } = req.body;
@@ -97,11 +97,11 @@ const updateNote = async (req, res) => {
 
     return res.json(updatedNote);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 };
 
-const deleteNote = async (req, res) => {
+const deleteNote = async (req, res, next) => {
   try {
     const { id } = req.params;
     const note = await Note.findById(id);
@@ -118,7 +118,7 @@ const deleteNote = async (req, res) => {
 
     return res.json({ message: "Note deleted" });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return next(error);
   }
 };
 

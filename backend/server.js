@@ -7,6 +7,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const noteRoutes = require("./routes/noteRoutes");
 const protect = require("./middleware/authMiddleware");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -53,17 +54,7 @@ app.get("/api/protected", protect, (req, res) => {
   });
 });
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-
-  if (res.headersSent) {
-    return next(err);
-  }
-
-  return res.status(err.status || 500).json({
-    message: err.message || "Server error",
-  });
-});
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
