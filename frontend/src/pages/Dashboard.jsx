@@ -15,6 +15,7 @@ const formatTags = (tags = []) => tags.join(', ')
 
 function Dashboard() {
   const token = localStorage.getItem('token')
+  const storedAuthUser = localStorage.getItem('authUser')
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [notesError, setNotesError] = useState('')
@@ -25,6 +26,16 @@ function Dashboard() {
   const [content, setContent] = useState('')
   const [tags, setTags] = useState('')
   const navigate = useNavigate()
+
+  let authUser = null
+
+  try {
+    authUser = storedAuthUser ? JSON.parse(storedAuthUser) : null
+  } catch {
+    authUser = null
+  }
+
+  const userLabel = authUser?.name || authUser?.email || 'Signed in user'
 
   const fetchNotes = async () => {
     if (!token) {
@@ -221,6 +232,7 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('authUser')
     navigate('/login', { replace: true })
   }
 
@@ -271,7 +283,7 @@ function Dashboard() {
       <header className="dashboard-nav">
         <div>
           <p className="dashboard-brand">SecureNotes</p>
-          <p className="dashboard-tagline">Private notes, available only after sign in.</p>
+          <p className="dashboard-tagline">Signed in as {userLabel}</p>
         </div>
         <button
           type="button"

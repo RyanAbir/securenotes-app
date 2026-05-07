@@ -51,6 +51,13 @@ function Login() {
       }
 
       localStorage.setItem('token', data.token)
+      localStorage.setItem(
+        'authUser',
+        JSON.stringify({
+          name: data.name || '',
+          email: data.email || email,
+        })
+      )
       toast.success('Login successful')
       navigate('/dashboard', { replace: true })
     } catch (error) {

@@ -51,11 +51,10 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 ## Phase 4 - User Account Features
 
 ### Done
-- None yet
+- Show logged-in username in UI
 
 ### Left
 - Profile page
-- Show logged-in username in UI
 - Update name/email
 - Change password
 - Delete account

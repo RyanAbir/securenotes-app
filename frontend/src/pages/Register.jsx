@@ -136,6 +136,13 @@ function Register() {
 
       if (data.token) {
         localStorage.setItem('token', data.token)
+        localStorage.setItem(
+          'authUser',
+          JSON.stringify({
+            name: data.name || name,
+            email: data.email || email,
+          })
+        )
         toast.success('Registration successful')
         navigate('/dashboard', { replace: true })
         return
