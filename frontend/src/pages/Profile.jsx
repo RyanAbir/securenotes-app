@@ -48,9 +48,9 @@ function Profile() {
         throw new Error(data.message || 'Failed to load profile')
       }
 
-      setProfile(data)
-      setName(data.name || '')
-      setEmail(data.email || '')
+      setProfile(data.data)
+      setName(data.data.name || '')
+      setEmail(data.data.email || '')
     } catch (error) {
       setProfileError(error.message)
       toast.error(error.message)
@@ -93,13 +93,13 @@ function Profile() {
 
       setProfile((currentProfile) => ({
         ...currentProfile,
-        ...data,
+        ...data.data,
       }))
-      setName(data.name || '')
-      setEmail(data.email || '')
+      setName(data.data.name || '')
+      setEmail(data.data.email || '')
       updateStoredAuthUser({
-        name: data.name || '',
-        email: data.email || '',
+        name: data.data.name || '',
+        email: data.data.email || '',
       })
       toast.success('Profile updated')
     } catch (error) {

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
-
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
+import DOMPurify from 'dompurify'
 import AppState from '../components/AppState'
 import { API_URL } from '../config/api'
 import { clearAuthSession, getStoredAuthUser, getStoredToken } from '../utils/auth'
@@ -54,7 +56,7 @@ function Dashboard() {
         throw new Error(data.message || 'Failed to fetch notes')
       }
 
-      setNotes(Array.isArray(data) ? data : [])
+      setNotes(Array.isArray(data.data) ? data.data : [])
     } catch (error) {
       setNotesError(error.message)
       toast.error(error.message)
@@ -92,7 +94,7 @@ function Dashboard() {
       setTitle('')
       setContent('')
       setTags('')
-      setNotes((currentNotes) => [data, ...currentNotes])
+      setNotes((currentNotes) => [data.data, ...currentNotes])
       toast.success('Note created')
     } catch (error) {
       toast.error(error.message)
@@ -179,7 +181,7 @@ function Dashboard() {
 
       setNotes((currentNotes) =>
         currentNotes.map((currentNote) =>
-          currentNote._id === note._id ? data : currentNote
+          currentNote._id === note._id ? data.data : currentNote
         )
       )
       toast.success('Note updated')
@@ -216,7 +218,7 @@ function Dashboard() {
 
       setNotes((currentNotes) =>
         currentNotes.map((currentNote) =>
-          currentNote._id === note._id ? data : currentNote
+          currentNote._id === note._id ? data.data : currentNote
         )
       )
       toast.success(note.pinned ? 'Note unpinned' : 'Note pinned')
@@ -253,7 +255,7 @@ function Dashboard() {
 
       setNotes((currentNotes) =>
         currentNotes.map((currentNote) =>
-          currentNote._id === note._id ? data : currentNote
+          currentNote._id === note._id ? data.data : currentNote
         )
       )
       toast.success(note.favorite ? 'Removed from favorites' : 'Added to favorites')
@@ -471,7 +473,7 @@ function Dashboard() {
                           {note.pinned ? <span className="note-badge">Pinned</span> : null}
                         </div>
                       </div>
-                      <p>{note.content}</p>
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content) }} />
                       {Array.isArray(note.tags) && note.tags.length > 0 ? (
                         <div className="note-tags">
                           {note.tags.map((tag) => (

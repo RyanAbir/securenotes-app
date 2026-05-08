@@ -1,4 +1,5 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -42,7 +43,7 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("SecureNotes API running");
+  res.json({ success: true, message: "SecureNotes API running" });
 });
 
 app.use("/api/auth", authRoutes); // 🔥 THIS LINE
@@ -51,8 +52,9 @@ app.use("/api/notes", noteRoutes);
 
 app.get("/api/protected", protect, (req, res) => {
   res.json({
+    success: true,
     message: "Protected route working",
-    userId: req.user,
+    data: { userId: req.user },
   });
 });
 

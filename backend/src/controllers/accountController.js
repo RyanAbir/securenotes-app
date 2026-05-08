@@ -8,10 +8,10 @@ const getAccount = async (req, res, next) => {
     const user = await User.findById(req.user).select("_id name email createdAt updatedAt");
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    return res.json(user);
+    return res.json({ success: true, data: user });
   } catch (error) {
     return next(error);
   }
@@ -23,7 +23,7 @@ const updateAccount = async (req, res, next) => {
     const user = await User.findById(req.user);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     const normalizedEmail = typeof email === "string" ? email.toLowerCase() : email;
@@ -34,7 +34,7 @@ const updateAccount = async (req, res, next) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "Email is already in use" });
+      return res.status(400).json({ success: false, message: "Email is already in use" });
     }
 
     user.name = name;
@@ -43,10 +43,13 @@ const updateAccount = async (req, res, next) => {
     await user.save();
 
     return res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      updatedAt: user.updatedAt,
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        updatedAt: user.updatedAt,
+      }
     });
   } catch (error) {
     return next(error);
@@ -59,19 +62,19 @@ const changePassword = async (req, res, next) => {
     const user = await User.findById(req.user);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ message: "Current password is incorrect" });
+      return res.status(400).json({ success: false, message: "Current password is incorrect" });
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
-    return res.json({ message: "Password updated successfully" });
+    return res.json({ success: true, message: "Password updated successfully" });
   } catch (error) {
     return next(error);
   }
@@ -82,13 +85,13 @@ const deleteAccount = async (req, res, next) => {
     const user = await User.findById(req.user);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     await Note.deleteMany({ user: req.user });
     await user.deleteOne();
 
-    return res.json({ message: "Account deleted successfully" });
+    return res.json({ success: true, message: "Account deleted successfully" });
   } catch (error) {
     return next(error);
   }

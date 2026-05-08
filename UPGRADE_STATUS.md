@@ -12,11 +12,12 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - Delete confirmation dialog
 - Basic mobile responsiveness improvements
 - Shared auth page layout
-
-### Left
 - Page-level loading polish beyond dashboard
 - More consistent inline validation across auth and note forms
 - Additional empty states where needed
+
+### Left
+- None in this phase
 
 ## Phase 2 - Notes Features
 
@@ -27,9 +28,10 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - Filter by tags
 - Sort notes (newest / oldest)
 - Favorite notes
+- Rich text editor
 
 ### Left
-- Rich text editor
+- None in this phase
 
 ## Phase 3 - Security Upgrade
 
@@ -66,11 +68,12 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 ### Done
 - Request validation middleware
 - Central auth middleware structure
-
-### Left
 - Global error handling cleanup
 - Cleaner folder structure
 - More consistent API responses
+
+### Left
+- None in this phase
 
 ## Phase 6 - Deployment & Production
 
@@ -78,8 +81,9 @@ This file tracks the upgrade roadmap progress so we can keep changes scoped and 
 - Frontend uses environment-based API URL
 - Production CORS fixed
 - Production frontend/backend connectivity fixed
-
-### Left
 - Deployment checklist documentation
 - Stronger production environment documentation
 - Seed/test-user strategy for production or staging
+
+### Left
+- None in this phase

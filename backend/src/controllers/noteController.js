@@ -14,7 +14,7 @@ const getNotes = async (req, res, next) => {
       pinned: -1,
       createdAt: -1,
     });
-    return res.json(notes);
+    return res.json({ success: true, data: notes });
   } catch (error) {
     return next(error);
   }
@@ -50,7 +50,7 @@ const createNote = async (req, res, next) => {
 
     const note = await Note.create(noteData);
 
-    return res.status(201).json(note);
+    return res.status(201).json({ success: true, data: note });
   } catch (error) {
     return next(error);
   }
@@ -95,7 +95,7 @@ const updateNote = async (req, res, next) => {
 
     const updatedNote = await note.save();
 
-    return res.json(updatedNote);
+    return res.json({ success: true, data: updatedNote });
   } catch (error) {
     return next(error);
   }
@@ -116,7 +116,7 @@ const deleteNote = async (req, res, next) => {
 
     await note.deleteOne();
 
-    return res.json({ message: "Note deleted" });
+    return res.json({ success: true, message: "Note deleted" });
   } catch (error) {
     return next(error);
   }

@@ -14,10 +14,10 @@ const protect = (req, res, next) => {
       req.user = decoded.id;
       next();
     } catch (err) {
-      return res.status(401).json({ message: "Token failed" });
+      return res.status(401).json({ success: false, message: "Token failed" });
     }
   } else {
-    return res.status(401).json({ message: "No token" });
+    return res.status(401).json({ success: false, message: "No token" });
   }
 };
 

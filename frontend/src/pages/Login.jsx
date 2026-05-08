@@ -52,14 +52,14 @@ function Login() {
         )
       }
 
-      if (!data.token) {
+      if (!data.data || !data.data.token) {
         throw new Error('Login failed: token missing')
       }
 
       storeAuthSession({
-        token: data.token,
-        name: data.name || '',
-        email: data.email || email,
+        token: data.data.token,
+        name: data.data.name || '',
+        email: data.data.email || email,
       })
       toast.success('Login successful')
       navigate('/dashboard', { replace: true })
