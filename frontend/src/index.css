@@ -485,30 +485,38 @@ code {
 }
 
 .notes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  columns: 3 220px;
+  column-gap: 20px;
+  orphans: 1;
+  widows: 1;
 }
 
 .note-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 20px;
-  min-height: 220px;
+  gap: 16px;
+  break-inside: avoid;
+  margin-bottom: 20px;
   padding: 20px;
   border: 1px solid var(--border);
   border-radius: 20px;
-  background: var(--bg);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.note-card-body h2 {
-  margin-bottom: 0;
+.note-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.12);
 }
 
-.note-card-body p {
-  white-space: pre-wrap;
-  word-break: break-word;
+.note-card--colored {
+  backdrop-filter: none;
+}
+
+.note-card--colored:hover {
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.18);
 }
 
 .note-card-header {
@@ -588,7 +596,12 @@ code {
   }
 
   .note-card {
-    background: rgba(31, 32, 40, 0.9);
+    background: rgba(31, 32, 40, 0.88);
+  }
+
+  .note-card--colored {
+    /* Colored cards keep their inline gradient in dark mode */
+    filter: brightness(0.88) saturate(1.1);
   }
 }
 

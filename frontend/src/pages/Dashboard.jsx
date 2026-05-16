@@ -4,10 +4,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import '../quill-overrides.css'
+import '../note-cards-extra.css'
 import DOMPurify from 'dompurify'
 import AppState from '../components/AppState'
 import { API_URL } from '../config/api'
 import { clearAuthSession, getStoredAuthUser, getStoredToken } from '../utils/auth'
+import { NOTE_COLORS, getNoteColor } from '../note-colors'
 
 const parseTags = (value) =>
   value
@@ -17,57 +19,46 @@ const parseTags = (value) =>
 
 const formatTags = (tags = []) => tags.join(', ')
 
+const quillModules = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['code-block'],
+    ['clean'],
+  ],
+}
+
 function Dashboard() {
   const token = getStoredToken()
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [notesError, setNotesError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedTag, setSelectedTag] = useState('all')
+  const [activeTab, setActiveTab] = useState('all')
   const [sortOrder, setSortOrder] = useState('newest')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [tags, setTags] = useState('')
+  const [noteColor, setNoteColor] = useState('default')
   const [editingNoteId, setEditingNoteId] = useState(null)
   const navigate = useNavigate()
-
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      ['code-block'],
-      ['clean'],
-    ],
-  }
 
   const authUser = getStoredAuthUser()
   const userLabel = authUser?.name || authUser?.email || 'Signed in user'
 
   const fetchNotes = async () => {
-    if (!token) {
-      return
-    }
+    if (!token) return
 
     setLoading(true)
     setNotesError('')
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/notes`,
-        {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        }
-      )
-
+      const response = await fetch(`${API_URL}/api/notes`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch notes')
-      }
-
+      if (!response.ok) throw new Error(data.message || 'Failed to fetch notes')
       setNotes(Array.isArray(data.data) ? data.data : [])
     } catch (error) {
       setNotesError(error.message)
@@ -81,6 +72,14 @@ function Dashboard() {
     fetchNotes()
   }, [token])
 
+  const buildPayload = ({ extraFields = {} } = {}) => ({
+    title,
+    content,
+    tags: parseTags(tags),
+    color: noteColor,
+    ...extraFields,
+  })
+
   const handleSubmit = async (event) => {
     event.preventDefault()
 
@@ -88,16 +87,18 @@ function Dashboard() {
       const url = editingNoteId
         ? `${API_URL}/api/notes/${editingNoteId}`
         : `${API_URL}/api/notes`
-      
       const method = editingNoteId ? 'PUT' : 'POST'
-      
-      const payload = { title, content, tags: parseTags(tags) }
-      
+
+      let payload = buildPayload()
       if (editingNoteId) {
-        const existingNote = notes.find((n) => n._id === editingNoteId)
-        if (existingNote) {
-          payload.pinned = existingNote.pinned
-          payload.favorite = existingNote.favorite
+        const existing = notes.find((n) => n._id === editingNoteId)
+        if (existing) {
+          payload = buildPayload({
+            extraFields: {
+              pinned: existing.pinned,
+              favorite: existing.favorite,
+            },
+          })
         }
       }
 
@@ -111,25 +112,20 @@ function Dashboard() {
       })
 
       const data = await response.json()
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(data.message || `Failed to ${editingNoteId ? 'update' : 'create'} note`)
-      }
 
       setTitle('')
       setContent('')
       setTags('')
-      
+      setNoteColor('default')
+
       if (editingNoteId) {
-        setNotes((currentNotes) =>
-          currentNotes.map((currentNote) =>
-            currentNote._id === editingNoteId ? data.data : currentNote
-          )
-        )
+        setNotes((cur) => cur.map((n) => (n._id === editingNoteId ? data.data : n)))
         setEditingNoteId(null)
         toast.success('Note updated')
       } else {
-        setNotes((currentNotes) => [data.data, ...currentNotes])
+        setNotes((cur) => [data.data, ...cur])
         toast.success('Note created')
       }
     } catch (error) {
@@ -142,33 +138,20 @@ function Dashboard() {
     setTitle('')
     setContent('')
     setTags('')
+    setNoteColor('default')
   }
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm('Are you sure you want to delete this note?')
-
-    if (!confirmed) {
-      return
-    }
+    if (!window.confirm('Are you sure you want to delete this note?')) return
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/notes/${id}`,
-        {
+      const response = await fetch(`${API_URL}/api/notes/${id}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        }
-      )
-
+        headers: { Authorization: `Bearer ${token}` },
+      })
       const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete note')
-      }
-
-      setNotes((currentNotes) => currentNotes.filter((note) => note._id !== id))
+      if (!response.ok) throw new Error(data.message || 'Failed to delete note')
+      setNotes((cur) => cur.filter((n) => n._id !== id))
       toast.success('Note deleted')
     } catch (error) {
       toast.error(error.message)
@@ -180,14 +163,13 @@ function Dashboard() {
     setTitle(note.title)
     setContent(note.content)
     setTags(formatTags(note.tags || []))
+    setNoteColor(note.color || 'default')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleTogglePinned = async (note) => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/notes/${note._id}`,
-        {
+      const response = await fetch(`${API_URL}/api/notes/${note._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -197,23 +179,14 @@ function Dashboard() {
           title: note.title,
           content: note.content,
           tags: Array.isArray(note.tags) ? note.tags : [],
+          color: note.color || 'default',
           pinned: !note.pinned,
           favorite: Boolean(note.favorite),
         }),
-        }
-      )
-
+      })
       const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update pinned status')
-      }
-
-      setNotes((currentNotes) =>
-        currentNotes.map((currentNote) =>
-          currentNote._id === note._id ? data.data : currentNote
-        )
-      )
+      if (!response.ok) throw new Error(data.message || 'Failed to update pinned status')
+      setNotes((cur) => cur.map((n) => (n._id === note._id ? data.data : n)))
       toast.success(note.pinned ? 'Note unpinned' : 'Note pinned')
     } catch (error) {
       toast.error(error.message)
@@ -222,9 +195,7 @@ function Dashboard() {
 
   const handleToggleFavorite = async (note) => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/notes/${note._id}`,
-        {
+      const response = await fetch(`${API_URL}/api/notes/${note._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -234,23 +205,14 @@ function Dashboard() {
           title: note.title,
           content: note.content,
           tags: Array.isArray(note.tags) ? note.tags : [],
+          color: note.color || 'default',
           pinned: Boolean(note.pinned),
           favorite: !note.favorite,
         }),
-        }
-      )
-
+      })
       const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update favorite status')
-      }
-
-      setNotes((currentNotes) =>
-        currentNotes.map((currentNote) =>
-          currentNote._id === note._id ? data.data : currentNote
-        )
-      )
+      if (!response.ok) throw new Error(data.message || 'Failed to update favorite status')
+      setNotes((cur) => cur.map((n) => (n._id === note._id ? data.data : n)))
       toast.success(note.favorite ? 'Removed from favorites' : 'Added to favorites')
     } catch (error) {
       toast.error(error.message)
@@ -262,47 +224,38 @@ function Dashboard() {
     navigate('/login', { replace: true })
   }
 
-  const availableTags = Array.from(
+  // ─── Derived data ───────────────────────────────────────────────
+  const allCategories = Array.from(
     new Set(
       notes.flatMap((note) =>
         Array.isArray(note.tags) ? note.tags.filter(Boolean) : []
       )
     )
-  ).sort((left, right) => left.localeCompare(right))
+  ).sort((a, b) => a.localeCompare(b))
 
   const visibleNotes = [...notes]
     .filter((note) => {
-    const query = searchTerm.trim().toLowerCase()
+      const query = searchTerm.trim().toLowerCase()
 
-      const matchesTag =
-        selectedTag === 'all' ||
-        (Array.isArray(note.tags) && note.tags.includes(selectedTag))
-
-      if (!matchesTag) {
-        return false
+      if (activeTab === 'favorites' && !note.favorite) return false
+      if (activeTab !== 'all' && activeTab !== 'favorites') {
+        const hasTag =
+          Array.isArray(note.tags) && note.tags.includes(activeTab)
+        if (!hasTag) return false
       }
 
-      if (!query) {
-        return true
-      }
-
+      if (!query) return true
       const titleText = (note.title || '').toLowerCase()
       const contentText = (note.content || '').toLowerCase()
-
       return titleText.includes(query) || contentText.includes(query)
     })
-    .sort((left, right) => {
-      const leftCreatedAt = new Date(left.createdAt || 0).getTime()
-      const rightCreatedAt = new Date(right.createdAt || 0).getTime()
-
-      if (sortOrder === 'oldest') {
-        return leftCreatedAt - rightCreatedAt
-      }
-
-      return rightCreatedAt - leftCreatedAt
+    .sort((a, b) => {
+      const aDate = new Date(a.createdAt || 0).getTime()
+      const bDate = new Date(b.createdAt || 0).getTime()
+      return sortOrder === 'oldest' ? aDate - bDate : bDate - aDate
     })
 
-  const hasActiveFilters = Boolean(searchTerm.trim()) || selectedTag !== 'all'
+  const hasFavorites = notes.some((n) => n.favorite)
 
   return (
     <div className="dashboard-page">
@@ -337,10 +290,15 @@ function Dashboard() {
         </section>
 
         <section className="dashboard-grid">
+          {/* ── Create / Edit Form ── */}
           <div className="dashboard-panel dashboard-form-panel">
             <div className="dashboard-section-header">
               <h2>{editingNoteId ? 'Update note' : 'Create a note'}</h2>
-              <p>{editingNoteId ? 'Make changes to your selected note.' : 'Write something important and keep it organized.'}</p>
+              <p>
+                {editingNoteId
+                  ? 'Make changes to your selected note.'
+                  : 'Write something important and keep it organized.'}
+              </p>
             </div>
             <form className="dashboard-form" onSubmit={handleSubmit}>
               <label className="dashboard-field">
@@ -353,18 +311,20 @@ function Dashboard() {
                   required
                 />
               </label>
+
               <label className="dashboard-field">
                 <span>Content</span>
                 <ReactQuill
                   theme="snow"
-                  modules={modules}
+                  modules={quillModules}
                   value={content}
                   onChange={setContent}
                   placeholder="Add your note details here"
                 />
               </label>
+
               <label className="dashboard-field">
-                <span>Tags</span>
+                <span>Category / Tags</span>
                 <input
                   type="text"
                   placeholder="work, personal, urgent"
@@ -372,6 +332,26 @@ function Dashboard() {
                   onChange={(event) => setTags(event.target.value)}
                 />
               </label>
+
+              {/* Color picker */}
+              <div className="dashboard-field">
+                <span>Note color</span>
+                <div className="note-color-picker">
+                  {NOTE_COLORS.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      title={c.label}
+                      className={`note-color-swatch${noteColor === c.id ? ' note-color-swatch--active' : ''}`}
+                      style={{
+                        background: c.id === 'default' ? 'var(--border)' : c.swatch,
+                      }}
+                      onClick={() => setNoteColor(c.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button type="submit" className="dashboard-button dashboard-button-primary">
                   {editingNoteId ? 'Update Note' : 'Add Note'}
@@ -389,12 +369,14 @@ function Dashboard() {
             </form>
           </div>
 
+          {/* ── Notes Panel ── */}
           <section className="dashboard-panel dashboard-notes-panel">
             <div className="dashboard-section-header">
               <h2>Your notes</h2>
               <p>{visibleNotes.length} visible note{visibleNotes.length === 1 ? '' : 's'}</p>
             </div>
 
+            {/* Search + Sort toolbar */}
             <div className="dashboard-toolbar">
               <label className="dashboard-field dashboard-search">
                 <span>Search notes</span>
@@ -408,21 +390,6 @@ function Dashboard() {
 
               <div className="dashboard-filters">
                 <label className="dashboard-field dashboard-select-field">
-                  <span>Filter by tag</span>
-                  <select
-                    value={selectedTag}
-                    onChange={(event) => setSelectedTag(event.target.value)}
-                  >
-                    <option value="all">All tags</option>
-                    {availableTags.map((tag) => (
-                      <option key={tag} value={tag}>
-                        {tag}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="dashboard-field dashboard-select-field">
                   <span>Sort</span>
                   <select
                     value={sortOrder}
@@ -435,6 +402,40 @@ function Dashboard() {
               </div>
             </div>
 
+            {/* Filter tabs */}
+            <div className="filter-tabs" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                className={`filter-tab${activeTab === 'all' ? ' filter-tab--active' : ''}`}
+                onClick={() => setActiveTab('all')}
+              >
+                All
+              </button>
+              {hasFavorites && (
+                <button
+                  type="button"
+                  role="tab"
+                  className={`filter-tab${activeTab === 'favorites' ? ' filter-tab--active' : ''}`}
+                  onClick={() => setActiveTab('favorites')}
+                >
+                  ★ Favorites
+                </button>
+              )}
+              {allCategories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  role="tab"
+                  className={`filter-tab${activeTab === cat ? ' filter-tab--active' : ''}`}
+                  onClick={() => setActiveTab(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Notes content */}
             {loading ? (
               <AppState
                 variant="loading"
@@ -458,68 +459,114 @@ function Dashboard() {
             ) : visibleNotes.length === 0 ? (
               <AppState
                 variant="empty"
-                title={hasActiveFilters ? 'No notes match your filters' : 'No matching notes'}
-                description={
-                  hasActiveFilters
-                    ? 'Try a different search term or tag filter to see more notes.'
-                    : 'Try a different search term or clear the search to see all notes.'
-                }
+                title="No notes match"
+                description="Try a different search term or switch the filter tab."
               />
             ) : (
               <div className="notes-grid">
-                {visibleNotes.map((note) => (
-                  <article key={note._id} className="note-card">
-                    <div className="note-card-body">
-                      <div className="note-card-header">
-                        <h2>{note.title}</h2>
-                        <div className="note-badges">
-                          {note.favorite ? <span className="note-badge note-badge-favorite">Favorite</span> : null}
-                          {note.pinned ? <span className="note-badge">Pinned</span> : null}
+                {visibleNotes.map((note) => {
+                  const palette = getNoteColor(note.color || 'default')
+                  const isColored = note.color && note.color !== 'default'
+                  return (
+                    <article
+                      key={note._id}
+                      className={`note-card${isColored ? ' note-card--colored' : ''}`}
+                      style={
+                        isColored
+                          ? {
+                              background: palette.cardBg,
+                              borderColor: palette.cardBorder,
+                              color: palette.textColor,
+                            }
+                          : {}
+                      }
+                    >
+                      <div className="note-card-body">
+                        <div className="note-card-header">
+                          <h2
+                            style={isColored ? { color: palette.textColor } : {}}
+                          >
+                            {note.title}
+                          </h2>
+                          <div className="note-badges">
+                            {note.favorite && (
+                              <span
+                                className="note-badge note-badge-favorite"
+                                title="Favorite"
+                              >
+                                ★
+                              </span>
+                            )}
+                            {note.pinned && (
+                              <span className="note-badge" title="Pinned">
+                                📌
+                              </span>
+                            )}
+                          </div>
                         </div>
+
+                        <div
+                          className="note-card-content"
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(note.content),
+                          }}
+                        />
+
+                        {Array.isArray(note.tags) && note.tags.length > 0 && (
+                          <div className="note-tags">
+                            {note.tags.map((tag) => (
+                              <span
+                                key={`${note._id}-${tag}`}
+                                className="note-tag"
+                                style={
+                                  isColored
+                                    ? {
+                                        background: 'rgba(0,0,0,0.1)',
+                                        color: palette.textColor,
+                                      }
+                                    : {}
+                                }
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content) }} />
-                      {Array.isArray(note.tags) && note.tags.length > 0 ? (
-                        <div className="note-tags">
-                          {note.tags.map((tag) => (
-                            <span key={`${note._id}-${tag}`} className="note-tag">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-                    <div className="note-card-actions">
-                      <button
-                        type="button"
-                        className="dashboard-button dashboard-button-secondary"
-                        onClick={() => handleToggleFavorite(note)}
-                      >
-                        {note.favorite ? 'Unfavorite' : 'Favorite'}
-                      </button>
-                      <button
-                        type="button"
-                        className="dashboard-button dashboard-button-secondary"
-                        onClick={() => handleTogglePinned(note)}
-                      >
-                        {note.pinned ? 'Unpin' : 'Pin'}
-                      </button>
-                      <button
-                        type="button"
-                        className="dashboard-button dashboard-button-secondary"
-                        onClick={() => handleEdit(note)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="dashboard-button dashboard-button-danger"
-                        onClick={() => handleDelete(note._id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </article>
-                ))}
+
+                      <div className="note-card-actions">
+                        <button
+                          type="button"
+                          className="dashboard-button dashboard-button-secondary"
+                          onClick={() => handleToggleFavorite(note)}
+                        >
+                          {note.favorite ? 'Unfavorite' : 'Favorite'}
+                        </button>
+                        <button
+                          type="button"
+                          className="dashboard-button dashboard-button-secondary"
+                          onClick={() => handleTogglePinned(note)}
+                        >
+                          {note.pinned ? 'Unpin' : 'Pin'}
+                        </button>
+                        <button
+                          type="button"
+                          className="dashboard-button dashboard-button-secondary"
+                          onClick={() => handleEdit(note)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="dashboard-button dashboard-button-danger"
+                          onClick={() => handleDelete(note._id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </article>
+                  )
+                })}
               </div>
             )}
           </section>

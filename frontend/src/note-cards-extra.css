@@ -1,0 +1,164 @@
+
+/* ============================================
+   Note Color Picker
+   ============================================ */
+
+.note-color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.note-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+.note-color-swatch:hover {
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.note-color-swatch--active {
+  border-color: var(--text-h);
+  transform: scale(1.2);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+/* ============================================
+   Filter Tab Bar
+   ============================================ */
+
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 20px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-tab {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.filter-tab:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: var(--text-h);
+  transform: translateY(-1px);
+}
+
+.filter-tab--active {
+  background: var(--text-h);
+  color: var(--bg);
+  border-color: var(--text-h);
+  font-weight: 600;
+}
+
+.filter-tab--active:hover {
+  background: var(--text-h);
+  color: var(--bg);
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   Note Card Content (rich HTML from Quill)
+   ============================================ */
+
+.note-card-content {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.note-card-content p {
+  margin-bottom: 6px;
+}
+
+.note-card-content h1,
+.note-card-content h2,
+.note-card-content h3 {
+  margin: 8px 0 4px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.note-card-content ul,
+.note-card-content ol {
+  padding-left: 18px;
+  margin-bottom: 6px;
+}
+
+.note-card-content pre {
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  overflow-x: auto;
+}
+
+.note-card-content code {
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 13px;
+}
+
+.note-card--colored .note-card-content {
+  color: inherit;
+}
+
+.note-card--colored .note-card-content h1,
+.note-card--colored .note-card-content h2,
+.note-card--colored .note-card-content h3 {
+  color: inherit;
+}
+
+/* Masonry responsive breakpoints */
+@media (max-width: 1024px) {
+  .notes-grid {
+    columns: 2 200px;
+    column-gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .notes-grid {
+    columns: 1;
+  }
+
+  .filter-tabs {
+    margin-bottom: 16px;
+  }
+}
