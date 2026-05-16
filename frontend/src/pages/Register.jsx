@@ -143,11 +143,13 @@ function Register() {
         )
       }
 
-      if (data.data && data.data.token) {
+      const resolvedToken = data.token || (data.data && data.data.token)
+
+      if (resolvedToken) {
         storeAuthSession({
-          token: data.data.token,
-          name: data.data.name || name,
-          email: data.data.email || email,
+          token: resolvedToken,
+          name: data.name || (data.data && data.data.name) || name,
+          email: data.email || (data.data && data.data.email) || email,
         })
         toast.success('Registration successful')
         navigate('/dashboard', { replace: true })
