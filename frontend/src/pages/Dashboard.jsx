@@ -769,31 +769,39 @@ function Dashboard() {
                       <div className="note-card-actions">
                         <button
                           type="button"
-                          className="dashboard-button dashboard-button-secondary"
+                          className="card-action-btn"
                           onClick={() => handleToggle(note, 'favorite')}
+                          title={note.favorite ? 'Unfavorite' : 'Favorite'}
+                          style={isColored ? { color: palette.textColor } : {}}
                         >
-                          {note.favorite ? 'Unfavorite' : 'Favorite'}
+                          {note.favorite ? '★' : '☆'}
                         </button>
                         <button
                           type="button"
-                          className="dashboard-button dashboard-button-secondary"
+                          className="card-action-btn"
                           onClick={() => handleToggle(note, 'pinned')}
+                          title={note.pinned ? 'Unpin' : 'Pin'}
+                          style={isColored ? { color: palette.textColor } : {}}
                         >
-                          {note.pinned ? 'Unpin' : 'Pin'}
+                          {note.pinned ? '📌' : '📍'}
                         </button>
                         <button
                           type="button"
-                          className="dashboard-button dashboard-button-secondary"
+                          className="card-action-btn"
                           onClick={() => handleEdit(note)}
+                          title="Edit"
+                          style={isColored ? { color: palette.textColor } : {}}
                         >
-                          Edit
+                          ✏️
                         </button>
                         <button
                           type="button"
-                          className="dashboard-button dashboard-button-danger"
+                          className="card-action-btn card-action-btn--danger"
                           onClick={() => handleDelete(note._id)}
+                          title="Delete"
+                          style={isColored ? { color: palette.textColor } : {}}
                         >
-                          Delete
+                          🗑️
                         </button>
                       </div>
                     </article>

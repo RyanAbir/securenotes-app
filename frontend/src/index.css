@@ -446,10 +446,9 @@ code {
   color: var(--text);
 }
 
-/* Notes Grid */
 .notes-grid {
-  columns: 3 220px;
-  column-gap: 20px;
+  columns: 3 280px;
+  column-gap: 24px;
 }
 
 .note-card {
@@ -469,6 +468,7 @@ code {
 .note-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.12);
+  border-color: var(--accent-border);
 }
 
 .note-card--colored {
@@ -526,8 +526,55 @@ code {
 
 .note-card-actions {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+.note-card:hover .note-card-actions {
+  opacity: 1;
+}
+
+.card-action-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.card-action-btn:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.card-action-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.note-card--colored .note-card-actions {
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+.note-card--colored .card-action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Dark Mode Overrides */
@@ -561,34 +608,47 @@ code {
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
+
+  .notes-grid {
+    columns: 2 240px;
+    column-gap: 20px;
+  }
 }
 
 @media (max-width: 640px) {
   .dashboard-nav {
-    flex-direction: column;
-    align-items: flex-start;
+    padding: 16px 20px;
   }
 
-  .dashboard-nav-actions {
-    width: 100%;
-    flex-direction: column;
+  .dashboard-brand {
+    font-size: 20px;
+  }
+
+  .dashboard-main {
+    padding: 20px 16px;
+  }
+
+  .dashboard-hero h1 {
+    font-size: 32px;
   }
 
   .dashboard-panel {
-    padding: 20px;
-    border-radius: 20px;
+    padding: 16px;
   }
 
   .dashboard-toolbar {
-    flex-direction: column;
-    align-items: stretch;
+    gap: 12px;
   }
 
-  .dashboard-filters {
-    width: 100%;
+  .filter-tabs-container {
+    gap: 8px;
+  }
+
+  .note-card {
+    padding: 16px;
   }
 
   .note-card-actions {
-    flex-direction: column;
+    opacity: 1; /* Always visible on touch */
   }
 }
