@@ -57,14 +57,15 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 1126px;
   margin: 0 auto;
   text-align: center;
   border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden; /* Prevent horizontal scroll on body */
 }
 
 h1,
@@ -617,38 +618,69 @@ code {
 
 @media (max-width: 640px) {
   .dashboard-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
     padding: 16px 20px;
+    text-align: center;
+  }
+
+  .dashboard-nav-actions {
+    justify-content: center;
   }
 
   .dashboard-brand {
     font-size: 20px;
+    text-align: center;
+  }
+
+  .dashboard-tagline {
+    text-align: center;
   }
 
   .dashboard-main {
-    padding: 20px 16px;
+    padding: 20px 12px;
   }
 
   .dashboard-hero h1 {
-    font-size: 32px;
+    font-size: 28px;
+    line-height: 1.2;
   }
 
   .dashboard-panel {
     padding: 16px;
+    border-radius: 16px;
   }
 
   .dashboard-toolbar {
+    flex-direction: column;
+    align-items: stretch;
     gap: 12px;
   }
 
+  .dashboard-filters {
+    width: 100%;
+  }
+
   .filter-tabs-container {
-    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .notes-grid {
+    columns: 1;
+    column-gap: 0;
   }
 
   .note-card {
     padding: 16px;
+    margin-bottom: 16px;
   }
 
   .note-card-actions {
     opacity: 1; /* Always visible on touch */
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }

@@ -12,6 +12,15 @@
   background: rgba(255, 255, 255, 0.4);
   padding: 12px !important;
   font-family: inherit !important;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+@media (max-width: 480px) {
+  .ql-toolbar.ql-snow {
+    padding: 8px !important;
+  }
 }
 
 .ql-container.ql-snow {
