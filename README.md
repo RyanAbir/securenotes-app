@@ -1,73 +1,141 @@
-# 🔐 SecureNotes
+# SecureNotes
 
-**SecureNotes** is a modern, colorful, and highly organized note-taking application designed for individuals who value both security and aesthetics. Built with the MERN stack, it offers a seamless writing experience with rich text support, dynamic checklists, and image attachments, all wrapped in a premium SaaS-inspired dark theme.
+SecureNotes is a full-stack note-taking app built with React, Node.js, Express, and MongoDB. It supports rich text notes, checklist notes, image attachments, color organization, search, filters, and authenticated private note storage.
 
-![SecureNotes Banner](https://placehold.co/1200x600/09090b/fafafa?text=SecureNotes+Dashboard)
+The project is structured as a MERN application with a Vite frontend and an Express API backend.
 
-## ✨ Key Features
+## Features
 
-- **🎨 Vibrant Organization**: Categorize notes using an 8-color palette and custom tags.
-- **📝 Multi-Format Support**:
-    - **Rich Text**: Advanced editor with headings, lists, and code blocks (React Quill).
-    - **Checklists**: Interactive todo lists with real-time progress tracking.
-    - **Images**: Attach visual context to your thoughts (supports drag-and-drop).
-- **📌 Smart Management**: Pin important notes and favorite your most-used items.
-- **🔍 Advanced Search & Filter**: Instant search across titles, content, tags, and even checklist items. Filter by type (Text, Checklist, Image) or category.
-- **🧱 Masonry Layout**: Dynamic, responsive grid that beautifully adapts to any screen size.
-- **🔒 Secure Architecture**: Robust JWT-based authentication and secure password hashing.
-- **🌙 Premium Dark UI**: Meticulously crafted dark mode with high-contrast typography and subtle micro-animations.
+- User registration and login with JWT authentication
+- Rich text notes with headings, lists, and code blocks
+- Checklist notes with interactive todo items and progress tracking
+- Image notes with drag-and-drop image upload support
+- Colorful note cards and tag-based organization
+- Modal note editing that keeps the dashboard position intact
+- Search across titles, content, tags, and checklist items
+- Filters for favorites, note type, image notes, and categories
+- Pin and favorite actions for note management
+- Responsive layout optimized for mobile and desktop screens
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Frontend**: React (Vite), React Router, React Quill, DOMPurify, CSS3 (Vanilla)
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB (Mongoose)
-- **Authentication**: JSON Web Tokens (JWT), BcryptJS
-- **Styling**: Modern CSS Variables, Masonry (Column-count)
+- Frontend: React, Vite, React Router, React Quill, DOMPurify, CSS
+- Backend: Node.js, Express, Mongoose
+- Database: MongoDB
+- Authentication: JWT, bcryptjs
+- Deployment-ready config: Render backend URL support and Vite environment variables
 
-## 🚀 Getting Started
+## Repository Structure
 
-### Prerequisites
-- Node.js (v18+)
-- MongoDB (Local or Atlas)
+```text
+securenotes-app/
+  backend/      Express API, MongoDB models, auth and note routes
+  frontend/     React/Vite client application
+  .env.example  Example environment variables
+```
 
-### Installation
+## Screenshots
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/RyanAbir/securenotes-app.git
-   cd securenotes-app
-   ```
+No production screenshots are included yet. Add real screenshots of the dashboard, mobile layout, and edit modal when available.
 
-2. **Backend Setup**:
-   ```bash
-   cd backend
-   npm install
-   # Create .env based on .env.example and add your MongoDB URI and JWT Secret
-   npm start
-   ```
+## Prerequisites
 
-3. **Frontend Setup**:
-   ```bash
-   cd ../frontend
-   npm install
-   # Update VITE_API_URL in your .env if different from default
-   npm run dev
-   ```
+- Node.js 18 or newer
+- npm
+- MongoDB Atlas connection string or a local MongoDB instance
 
-## 📋 Environment Variables
+## Environment Setup
 
-Refer to [.env.example](.env.example) for the required configuration.
+Create environment files before running the app locally.
 
-## 🗺️ Roadmap
-- [ ] Multi-select batch actions (delete/archive).
-- [ ] Shareable public note links.
-- [ ] Export notes to PDF/Markdown.
-- [ ] Mobile app version (React Native).
+Root example:
 
-## 👨‍💻 Author
-**Ryan Abir**
+```env
+# Backend
+PORT=5000
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/securenotes
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/securenotes
+JWT_SECRET=replace-with-a-long-random-secret
+FRONTEND_URL=http://localhost:5173
+
+# Frontend
+VITE_API_URL=http://localhost:5000
+
+# Deployment
+RENDER_BACKEND_URL=https://your-render-service.onrender.com
+```
+
+Backend:
+
+```bash
+cd backend
+cp ../.env.example .env
+```
+
+Frontend:
+
+```bash
+cd frontend
+echo VITE_API_URL=http://localhost:5000 > .env
+```
+
+Note: the current backend reads `MONGO_URI`. `MONGODB_URI` is included in the examples for clarity and compatibility with common MongoDB naming conventions.
+
+## Local Development
+
+Install backend dependencies:
+
+```bash
+cd backend
+npm install
+```
+
+Start the backend API:
+
+```bash
+npm start
+```
+
+In a second terminal, install frontend dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+Open the app at:
+
+```text
+http://localhost:5173
+```
+
+The frontend expects the API at `VITE_API_URL`, which defaults to the configured production backend if no local value is provided.
+
+## Build
+
+Build the frontend:
+
+```bash
+cd frontend
+npm run build
+```
+
+## API Overview
+
+The backend exposes authenticated routes for account access and note management:
+
+- Auth: register and login
+- Notes: create, read, update, delete, pin, favorite, checklist updates
+- Account: profile-related account operations
+
+## Author
+
+Ryan Abir
+
 - GitHub: [@RyanAbir](https://github.com/RyanAbir)
-
----
-*Built for the Modern Web — Secure, Colorful, and Fast.*
