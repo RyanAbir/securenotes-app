@@ -474,7 +474,7 @@ function Dashboard() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div className="dashboard-form-actions">
                 <button type="submit" className="dashboard-button dashboard-button-primary">
                   {editingNoteId ? 'Update Note' : 'Add Note'}
                 </button>
