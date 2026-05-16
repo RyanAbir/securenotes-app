@@ -45,6 +45,7 @@ const quillModules = {
 function Dashboard() {
   const token = getStoredToken()
   const uid = useId()
+  const editUid = useId()
 
   // Data
   const [notes, setNotes] = useState([])
@@ -64,7 +65,16 @@ function Dashboard() {
   const [tags, setTags] = useState('')
   const [noteColor, setNoteColor] = useState('default')
   const [imageUrl, setImageUrl] = useState('')
-  const [editingNoteId, setEditingNoteId] = useState(null)
+
+  // Edit modal fields
+  const [editingNote, setEditingNote] = useState(null)
+  const [editNoteType, setEditNoteType] = useState('text')
+  const [editTitle, setEditTitle] = useState('')
+  const [editContent, setEditContent] = useState('')
+  const [editTodoItems, setEditTodoItems] = useState([makeTodoItem()])
+  const [editTags, setEditTags] = useState('')
+  const [editNoteColor, setEditNoteColor] = useState('default')
+  const [editImageUrl, setEditImageUrl] = useState('')
 
   const navigate = useNavigate()
   const authUser = getStoredAuthUser()
@@ -93,8 +103,27 @@ function Dashboard() {
 
   useEffect(() => { fetchNotes() }, [token])
 
+  useEffect(() => {
+    if (!editingNote) return undefined
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setEditingNote(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [editingNote])
+
   const resetForm = () => {
-    setEditingNoteId(null)
     setNoteType('text')
     setTitle('')
     setContent('')
@@ -104,37 +133,34 @@ function Dashboard() {
     setImageUrl('')
   }
 
-  const buildPayload = (extraFields = {}) => ({
-    title,
-    type: noteType,
-    content: noteType === 'text' ? content : '',
-    todos: noteType === 'todo'
-      ? todoItems.filter((item) => item.text.trim() !== '')
+  const buildPayload = (fields, extraFields = {}) => ({
+    title: fields.title,
+    type: fields.noteType,
+    content: fields.noteType === 'text' ? fields.content : '',
+    todos: fields.noteType === 'todo'
+      ? fields.todoItems.filter((item) => item.text.trim() !== '')
       : [],
-    tags: parseTags(tags),
-    color: noteColor,
-    imageUrl,
+    tags: parseTags(fields.tags),
+    color: fields.noteColor,
+    imageUrl: fields.imageUrl,
     ...extraFields,
   })
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     try {
-      const isEditing = Boolean(editingNoteId)
-      const url = isEditing
-        ? `${API_URL}/api/notes/${editingNoteId}`
-        : `${API_URL}/api/notes`
+      const payload = buildPayload({
+        title,
+        noteType,
+        content,
+        todoItems,
+        tags,
+        noteColor,
+        imageUrl,
+      })
 
-      let payload = buildPayload()
-      if (isEditing) {
-        const existing = notes.find((n) => n._id === editingNoteId)
-        if (existing) {
-          payload = buildPayload({ pinned: existing.pinned, favorite: existing.favorite })
-        }
-      }
-
-      const res = await fetch(url, {
-        method: isEditing ? 'PUT' : 'POST',
+      const res = await fetch(`${API_URL}/api/notes`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -142,15 +168,10 @@ function Dashboard() {
         body: JSON.stringify(payload),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.message || `Failed to ${isEditing ? 'update' : 'create'} note`)
+      if (!res.ok) throw new Error(data.message || 'Failed to create note')
 
-      if (isEditing) {
-        setNotes((cur) => cur.map((n) => (n._id === editingNoteId ? data.data : n)))
-        toast.success('Note updated')
-      } else {
-        setNotes((cur) => [data.data, ...cur])
-        toast.success('Note created')
-      }
+      setNotes((cur) => [data.data, ...cur])
+      toast.success('Note created')
       resetForm()
     } catch (err) {
       toast.error(err.message)
@@ -174,19 +195,62 @@ function Dashboard() {
   }
 
   const handleEdit = (note) => {
-    setEditingNoteId(note._id)
-    setNoteType(note.type || 'text')
-    setTitle(note.title)
-    setContent(note.content || '')
-    setTodoItems(
+    setEditingNote(note)
+    setEditNoteType(note.type || 'text')
+    setEditTitle(note.title)
+    setEditContent(note.content || '')
+    setEditTodoItems(
       Array.isArray(note.todos) && note.todos.length > 0
         ? note.todos
         : [makeTodoItem()]
     )
-    setTags(formatTags(note.tags || []))
-    setNoteColor(note.color || 'default')
-    setImageUrl(note.imageUrl || '')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setEditTags(formatTags(note.tags || []))
+    setEditNoteColor(note.color || 'default')
+    setEditImageUrl(note.imageUrl || '')
+  }
+
+  const closeEditModal = () => {
+    setEditingNote(null)
+  }
+
+  const handleEditSubmit = async (event) => {
+    event.preventDefault()
+    if (!editingNote) return
+
+    try {
+      const payload = buildPayload(
+        {
+          title: editTitle,
+          noteType: editNoteType,
+          content: editContent,
+          todoItems: editTodoItems,
+          tags: editTags,
+          noteColor: editNoteColor,
+          imageUrl: editImageUrl,
+        },
+        {
+          pinned: Boolean(editingNote.pinned),
+          favorite: Boolean(editingNote.favorite),
+        }
+      )
+
+      const res = await fetch(`${API_URL}/api/notes/${editingNote._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to update note')
+
+      setNotes((cur) => cur.map((n) => (n._id === editingNote._id ? data.data : n)))
+      toast.success('Note updated')
+      closeEditModal()
+    } catch (err) {
+      toast.error(err.message)
+    }
   }
 
   const handleToggle = async (note, field) => {
@@ -274,6 +338,23 @@ function Dashboard() {
       )
     )
 
+  const addEditTodoItem = () => setEditTodoItems((cur) => [...cur, makeTodoItem()])
+
+  const updateEditTodoItem = (index, text) =>
+    setEditTodoItems((cur) =>
+      cur.map((item, i) => (i === index ? { ...item, text } : item))
+    )
+
+  const removeEditTodoItem = (index) =>
+    setEditTodoItems((cur) => cur.filter((_, i) => i !== index))
+
+  const toggleEditTodoItemForm = (index) =>
+    setEditTodoItems((cur) =>
+      cur.map((item, i) =>
+        i === index ? { ...item, completed: !item.completed } : item
+      )
+    )
+
   // ─── Derived data ──────────────────────────────────────────────────────────
 
   const allCategories = Array.from(
@@ -281,8 +362,6 @@ function Dashboard() {
       notes.flatMap((n) => (Array.isArray(n.tags) ? n.tags.filter(Boolean) : []))
     )
   ).sort((a, b) => a.localeCompare(b))
-
-  const hasFavorites = notes.some((n) => n.favorite)
 
   const visibleNotes = [...notes]
     .filter((note) => {
@@ -348,15 +427,11 @@ function Dashboard() {
         </section>
 
         <section className="dashboard-grid">
-          {/* ── Create / Edit Form ── */}
+          {/* ── Create Form ── */}
           <div className="dashboard-panel dashboard-form-panel">
             <div className="dashboard-section-header">
-              <h2>{editingNoteId ? 'Update note' : 'Create a note'}</h2>
-              <p>
-                {editingNoteId
-                  ? 'Make changes to your selected note.'
-                  : 'Write something important and keep it organized.'}
-              </p>
+              <h2>Create a note</h2>
+              <p>Write something important and keep it organized.</p>
             </div>
 
             <form className="dashboard-form" onSubmit={handleSubmit}>
@@ -476,17 +551,8 @@ function Dashboard() {
 
               <div className="dashboard-form-actions">
                 <button type="submit" className="dashboard-button dashboard-button-primary">
-                  {editingNoteId ? 'Update Note' : 'Add Note'}
+                  Add Note
                 </button>
-                {editingNoteId && (
-                  <button
-                    type="button"
-                    className="dashboard-button dashboard-button-secondary"
-                    onClick={resetForm}
-                  >
-                    Cancel
-                  </button>
-                )}
               </div>
             </form>
           </div>
@@ -812,6 +878,166 @@ function Dashboard() {
           </section>
         </section>
       </main>
+
+      {editingNote && (
+        <div
+          className="edit-modal-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeEditModal()
+            }
+          }}
+        >
+          <section
+            className="edit-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`${editUid}-title`}
+          >
+            <div className="edit-modal-header">
+              <div>
+                <p className="dashboard-eyebrow">Edit note</p>
+                <h2 id={`${editUid}-title`}>Update note</h2>
+              </div>
+              <button
+                type="button"
+                className="edit-modal-close"
+                onClick={closeEditModal}
+                title="Close edit dialog"
+              >
+                x
+              </button>
+            </div>
+
+            <form className="dashboard-form edit-modal-form" onSubmit={handleEditSubmit}>
+              <div className="note-type-tabs">
+                <button
+                  type="button"
+                  className={`note-type-tab${editNoteType === 'text' ? ' note-type-tab--active' : ''}`}
+                  onClick={() => setEditNoteType('text')}
+                >
+                  Text
+                </button>
+                <button
+                  type="button"
+                  className={`note-type-tab${editNoteType === 'todo' ? ' note-type-tab--active' : ''}`}
+                  onClick={() => setEditNoteType('todo')}
+                >
+                  Checklist
+                </button>
+              </div>
+
+              <label className="dashboard-field">
+                <span>Title</span>
+                <input
+                  type="text"
+                  placeholder={editNoteType === 'todo' ? 'Shopping list' : 'Weekly plan'}
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  required
+                />
+              </label>
+
+              {editNoteType === 'text' ? (
+                <label className="dashboard-field">
+                  <span>Content</span>
+                  <ReactQuill
+                    theme="snow"
+                    modules={quillModules}
+                    value={editContent}
+                    onChange={setEditContent}
+                    placeholder="Add your note details here"
+                  />
+                </label>
+              ) : (
+                <div className="dashboard-field">
+                  <span>Checklist items</span>
+                  <div className="todo-editor">
+                    {editTodoItems.map((item, index) => (
+                      <div key={item.id} className="todo-editor-row">
+                        <button
+                          type="button"
+                          className={`todo-check-btn${item.completed ? ' todo-check-btn--done' : ''}`}
+                          onClick={() => toggleEditTodoItemForm(index)}
+                          title={item.completed ? 'Mark incomplete' : 'Mark complete'}
+                        >
+                          {item.completed ? 'v' : ''}
+                        </button>
+                        <input
+                          id={`${editUid}-todo-${index}`}
+                          type="text"
+                          className={`todo-editor-input${item.completed ? ' todo-editor-input--done' : ''}`}
+                          placeholder={`Item ${index + 1}`}
+                          value={item.text}
+                          onChange={(e) => updateEditTodoItem(index, e.target.value)}
+                        />
+                        {editTodoItems.length > 1 && (
+                          <button
+                            type="button"
+                            className="todo-remove-btn"
+                            onClick={() => removeEditTodoItem(index)}
+                            title="Remove item"
+                          >
+                            x
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button type="button" className="todo-add-btn" onClick={addEditTodoItem}>
+                      + Add item
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="dashboard-field">
+                <span>Attach image <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></span>
+                <ImageUploader value={editImageUrl} onChange={setEditImageUrl} />
+              </div>
+
+              <label className="dashboard-field">
+                <span>Category / Tags</span>
+                <input
+                  type="text"
+                  placeholder="work, personal, urgent"
+                  value={editTags}
+                  onChange={(e) => setEditTags(e.target.value)}
+                />
+              </label>
+
+              <div className="dashboard-field">
+                <span>Note color</span>
+                <div className="note-color-picker">
+                  {NOTE_COLORS.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      title={c.label}
+                      className={`note-color-swatch${editNoteColor === c.id ? ' note-color-swatch--active' : ''}`}
+                      style={{ background: c.id === 'default' ? 'var(--border)' : c.swatch }}
+                      onClick={() => setEditNoteColor(c.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="dashboard-form-actions edit-modal-actions">
+                <button type="submit" className="dashboard-button dashboard-button-primary">
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  className="dashboard-button dashboard-button-secondary"
+                  onClick={closeEditModal}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   )
 }

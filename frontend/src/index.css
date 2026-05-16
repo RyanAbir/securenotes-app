@@ -714,6 +714,116 @@ code {
   overflow: hidden;
 }
 
+.edit-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(8, 6, 13, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.edit-modal {
+  width: min(100%, 720px);
+  max-height: min(860px, calc(100svh - 48px));
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+
+.edit-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.edit-modal-header .dashboard-eyebrow {
+  margin-bottom: 6px;
+}
+
+.edit-modal-close {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.edit-modal-form {
+  padding: 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.edit-modal-actions {
+  position: sticky;
+  bottom: -24px;
+  margin: 8px -24px -24px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--border);
+  background: inherit;
+}
+
+@media (max-width: 640px) {
+  .edit-modal-backdrop {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .edit-modal {
+    width: 100%;
+    max-height: calc(100svh - 24px);
+    border-radius: 16px;
+  }
+
+  .edit-modal-header {
+    padding: 16px;
+  }
+
+  .edit-modal-form {
+    padding: 16px;
+  }
+
+  .edit-modal-actions {
+    bottom: -16px;
+    margin: 8px -16px -16px;
+    padding: 12px 16px 16px;
+  }
+}
+
+@media (max-width: 430px) {
+  .edit-modal-backdrop {
+    padding: 8px;
+  }
+
+  .edit-modal {
+    max-height: calc(100svh - 16px);
+    border-radius: 14px;
+  }
+
+  .edit-modal-close {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 /* App State */
 .app-state {
   display: grid;
@@ -980,7 +1090,7 @@ code {
       linear-gradient(180deg, rgba(9, 9, 11, 0.6), transparent 40%);
   }
 
-  .auth-card, .dashboard-panel {
+  .auth-card, .dashboard-panel, .edit-modal {
     background: rgba(18, 18, 23, 0.86);
   }
 
