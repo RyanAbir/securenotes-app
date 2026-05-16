@@ -32,6 +32,159 @@
 }
 
 /* ============================================
+   Note Type Selector Tabs (form)
+   ============================================ */
+
+.note-type-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.note-type-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.note-type-tab:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: var(--text-h);
+}
+
+.note-type-tab--active {
+  background: var(--text-h);
+  color: var(--bg);
+  border-color: var(--text-h);
+  font-weight: 600;
+}
+
+/* ============================================
+   Todo Item Editor (in form)
+   ============================================ */
+
+.todo-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.todo-editor:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.todo-editor-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.todo-check-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  padding: 0;
+}
+
+.todo-check-btn--done {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.todo-editor-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-h);
+  font-size: 15px;
+  padding: 4px 0;
+  outline: none;
+  transition: color 0.15s ease, text-decoration 0.15s ease;
+}
+
+.todo-editor-input::placeholder {
+  color: var(--text);
+  opacity: 0.5;
+}
+
+.todo-editor-input--done {
+  color: var(--text);
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.todo-remove-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  padding: 0;
+}
+
+.todo-remove-btn:hover {
+  opacity: 1;
+  background: rgba(251, 113, 133, 0.15);
+  color: #e11d48;
+}
+
+.todo-add-btn {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-top: 4px;
+  transition: opacity 0.15s ease;
+}
+
+.todo-add-btn:hover {
+  opacity: 0.75;
+}
+
+/* ============================================
    Filter Tab Bar
    ============================================ */
 
@@ -87,8 +240,21 @@
 }
 
 /* ============================================
-   Note Card Content (rich HTML from Quill)
+   Note Card: text content
    ============================================ */
+
+.note-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.note-type-badge {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
 
 .note-card-content {
   flex: 1;
@@ -102,9 +268,7 @@
   overflow: hidden;
 }
 
-.note-card-content p {
-  margin-bottom: 6px;
-}
+.note-card-content p { margin-bottom: 6px; }
 
 .note-card-content h1,
 .note-card-content h2,
@@ -145,7 +309,100 @@
   color: inherit;
 }
 
-/* Masonry responsive breakpoints */
+/* ============================================
+   Note Card: todo preview
+   ============================================ */
+
+.todo-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todo-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.todo-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.todo-count {
+  font-size: 12px;
+  color: var(--text);
+  margin: 0;
+  opacity: 0.7;
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.todo-item--done .todo-item-text {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.todo-checkbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--text-h);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.todo-checkbox--checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.todo-item-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-h);
+  transition: opacity 0.15s ease;
+}
+
+.todo-more {
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.6;
+  font-style: italic;
+  padding-left: 26px;
+}
+
+/* ============================================
+   Masonry grid responsive breakpoints
+   ============================================ */
+
 @media (max-width: 1024px) {
   .notes-grid {
     columns: 2 200px;
@@ -160,5 +417,9 @@
 
   .filter-tabs {
     margin-bottom: 16px;
+  }
+
+  .note-type-tabs {
+    gap: 6px;
   }
 }

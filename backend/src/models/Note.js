@@ -1,5 +1,14 @@
 const mongoose = require("mongoose");
 
+const todoItemSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true },
+    text: { type: String, required: true },
+    completed: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
+
 const noteSchema = new mongoose.Schema(
   {
     user: {
@@ -11,9 +20,18 @@ const noteSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    type: {
+      type: String,
+      enum: ["text", "todo"],
+      default: "text",
+    },
     content: {
       type: String,
-      required: true,
+      default: "",
+    },
+    todos: {
+      type: [todoItemSchema],
+      default: [],
     },
     tags: {
       type: [String],
@@ -29,7 +47,7 @@ const noteSchema = new mongoose.Schema(
     },
     color: {
       type: String,
-      default: 'default',
+      default: "default",
     },
   },
   {

@@ -1,11 +1,24 @@
 const Note = require("../models/Note");
 
 const normalizeTags = (tags) => {
-  if (!Array.isArray(tags)) {
-    return undefined;
-  }
-
+  if (!Array.isArray(tags)) return undefined;
   return tags.filter((tag) => typeof tag === "string");
+};
+
+const normalizeTodos = (todos) => {
+  if (!Array.isArray(todos)) return undefined;
+  return todos
+    .filter(
+      (item) =>
+        item &&
+        typeof item.id === "string" &&
+        typeof item.text === "string"
+    )
+    .map((item) => ({
+      id: item.id,
+      text: item.text,
+      completed: typeof item.completed === "boolean" ? item.completed : false,
+    }));
 };
 
 const getNotes = async (req, res, next) => {
@@ -22,38 +35,30 @@ const getNotes = async (req, res, next) => {
 
 const createNote = async (req, res, next) => {
   try {
-    const { title, content, tags, pinned, favorite, color } = req.body;
+    const { title, content, type, todos, tags, pinned, favorite, color } = req.body;
 
-    if (!title || !content) {
-      return res.status(400).json({ message: "Please provide title and content" });
+    if (!title) {
+      return res.status(400).json({ message: "Please provide a title" });
     }
 
     const noteData = {
       user: req.user,
       title,
-      content,
+      type: type === "todo" ? "todo" : "text",
+      content: typeof content === "string" ? content : "",
     };
 
+    const normalizedTodos = normalizeTodos(todos);
+    if (normalizedTodos !== undefined) noteData.todos = normalizedTodos;
+
     const normalizedTags = normalizeTags(tags);
+    if (normalizedTags !== undefined) noteData.tags = normalizedTags;
 
-    if (normalizedTags !== undefined) {
-      noteData.tags = normalizedTags;
-    }
-
-    if (typeof pinned === "boolean") {
-      noteData.pinned = pinned;
-    }
-
-    if (typeof favorite === "boolean") {
-      noteData.favorite = favorite;
-    }
-
-    if (typeof color === "string" && color.length > 0) {
-      noteData.color = color;
-    }
+    if (typeof pinned === "boolean") noteData.pinned = pinned;
+    if (typeof favorite === "boolean") noteData.favorite = favorite;
+    if (typeof color === "string" && color.length > 0) noteData.color = color;
 
     const note = await Note.create(noteData);
-
     return res.status(201).json({ success: true, data: note });
   } catch (error) {
     return next(error);
@@ -63,46 +68,28 @@ const createNote = async (req, res, next) => {
 const updateNote = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, content, tags, pinned, favorite, color } = req.body;
+    const { title, content, type, todos, tags, pinned, favorite, color } = req.body;
 
     const note = await Note.findById(id);
-
-    if (!note) {
-      return res.status(404).json({ message: "Note not found" });
-    }
-
-    if (note.user.toString() !== req.user) {
+    if (!note) return res.status(404).json({ message: "Note not found" });
+    if (note.user.toString() !== req.user)
       return res.status(401).json({ message: "Not authorized" });
-    }
 
-    if (title !== undefined) {
-      note.title = title;
-    }
+    if (title !== undefined) note.title = title;
+    if (typeof content === "string") note.content = content;
+    if (type === "todo" || type === "text") note.type = type;
 
-    if (content !== undefined) {
-      note.content = content;
-    }
+    const normalizedTodos = normalizeTodos(todos);
+    if (normalizedTodos !== undefined) note.todos = normalizedTodos;
 
     const normalizedTags = normalizeTags(tags);
+    if (normalizedTags !== undefined) note.tags = normalizedTags;
 
-    if (normalizedTags !== undefined) {
-      note.tags = normalizedTags;
-    }
-
-    if (typeof pinned === "boolean") {
-      note.pinned = pinned;
-    }
-
-    if (typeof favorite === "boolean") {
-      note.favorite = favorite;
-    }
-
-    if (typeof color === "string" && color.length > 0) {
-      note.color = color;
-    }
+    if (typeof pinned === "boolean") note.pinned = pinned;
+    if (typeof favorite === "boolean") note.favorite = favorite;
+    if (typeof color === "string" && color.length > 0) note.color = color;
 
     const updatedNote = await note.save();
-
     return res.json({ success: true, data: updatedNote });
   } catch (error) {
     return next(error);
@@ -113,26 +100,15 @@ const deleteNote = async (req, res, next) => {
   try {
     const { id } = req.params;
     const note = await Note.findById(id);
-
-    if (!note) {
-      return res.status(404).json({ message: "Note not found" });
-    }
-
-    if (note.user.toString() !== req.user) {
+    if (!note) return res.status(404).json({ message: "Note not found" });
+    if (note.user.toString() !== req.user)
       return res.status(401).json({ message: "Not authorized" });
-    }
 
     await note.deleteOne();
-
     return res.json({ success: true, message: "Note deleted" });
   } catch (error) {
     return next(error);
   }
 };
 
-module.exports = {
-  getNotes,
-  createNote,
-  updateNote,
-  deleteNote,
-};
+module.exports = { getNotes, createNote, updateNote, deleteNote };
