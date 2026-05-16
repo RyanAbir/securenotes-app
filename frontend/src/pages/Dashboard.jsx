@@ -287,16 +287,29 @@ function Dashboard() {
   const visibleNotes = [...notes]
     .filter((note) => {
       const query = searchTerm.trim().toLowerCase()
-      if (activeTab === 'favorites' && !note.favorite) return false
-      if (activeTab !== 'all' && activeTab !== 'favorites') {
+      
+      // Tab Filtering
+      if (activeTab === 'favorites') {
+        if (!note.favorite) return false
+      } else if (activeTab === 'type:text') {
+        if (note.type !== 'text') return false
+      } else if (activeTab === 'type:todo') {
+        if (note.type !== 'todo') return false
+      } else if (activeTab === 'type:image') {
+        if (!note.imageUrl) return false
+      } else if (activeTab !== 'all') {
+        // Category/Tag filter
         if (!Array.isArray(note.tags) || !note.tags.includes(activeTab)) return false
       }
+
+      // Search Filtering
       if (!query) return true
-      return (
-        (note.title || '').toLowerCase().includes(query) ||
-        (note.content || '').toLowerCase().includes(query) ||
-        (note.todos || []).some((t) => t.text.toLowerCase().includes(query))
-      )
+      const inTitle = (note.title || '').toLowerCase().includes(query)
+      const inContent = (note.content || '').toLowerCase().includes(query)
+      const inTags = (note.tags || []).some(t => t.toLowerCase().includes(query))
+      const inTodos = (note.todos || []).some((t) => t.text.toLowerCase().includes(query))
+      
+      return inTitle || inContent || inTags || inTodos
     })
     .sort((a, b) => {
       const aT = new Date(a.createdAt || 0).getTime()
@@ -489,15 +502,27 @@ function Dashboard() {
 
             {/* Search + Sort */}
             <div className="dashboard-toolbar">
-              <label className="dashboard-field dashboard-search">
-                <span>Search notes</span>
-                <input
-                  type="search"
-                  placeholder="Search by title or content"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </label>
+              <div className="dashboard-search-container">
+                <label className="dashboard-field dashboard-search">
+                  <span>Search notes</span>
+                  <div className="search-input-wrapper">
+                    <input
+                      type="text"
+                      placeholder="Search title, tags, or content..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                      <button 
+                        type="button" 
+                        className="search-clear-btn"
+                        onClick={() => setSearchTerm('')}
+                        title="Clear search"
+                      >✕</button>
+                    )}
+                  </div>
+                </label>
+              </div>
               <div className="dashboard-filters">
                 <label className="dashboard-field dashboard-select-field">
                   <span>Sort</span>
@@ -510,36 +535,58 @@ function Dashboard() {
             </div>
 
             {/* Filter tabs */}
-            <div className="filter-tabs" role="tablist">
-              <button
-                type="button"
-                role="tab"
-                className={`filter-tab${activeTab === 'all' ? ' filter-tab--active' : ''}`}
-                onClick={() => setActiveTab('all')}
-              >
-                All
-              </button>
-              {hasFavorites && (
+            <div className="filter-tabs-container">
+              <div className="filter-tabs" role="tablist">
                 <button
-                  type="button"
-                  role="tab"
+                  type="button" role="tab"
+                  className={`filter-tab${activeTab === 'all' ? ' filter-tab--active' : ''}`}
+                  onClick={() => setActiveTab('all')}
+                >All</button>
+                
+                <button
+                  type="button" role="tab"
                   className={`filter-tab${activeTab === 'favorites' ? ' filter-tab--active' : ''}`}
                   onClick={() => setActiveTab('favorites')}
-                >
-                  ★ Favorites
-                </button>
-              )}
-              {allCategories.map((cat) => (
+                >★ Favorites</button>
+
+                <div className="filter-divider"></div>
+
                 <button
-                  key={cat}
-                  type="button"
-                  role="tab"
-                  className={`filter-tab${activeTab === cat ? ' filter-tab--active' : ''}`}
-                  onClick={() => setActiveTab(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
+                  type="button" role="tab"
+                  className={`filter-tab${activeTab === 'type:text' ? ' filter-tab--active' : ''}`}
+                  onClick={() => setActiveTab('type:text')}
+                >✏️ Text</button>
+                
+                <button
+                  type="button" role="tab"
+                  className={`filter-tab${activeTab === 'type:todo' ? ' filter-tab--active' : ''}`}
+                  onClick={() => setActiveTab('type:todo')}
+                >✅ Checklists</button>
+                
+                <button
+                  type="button" role="tab"
+                  className={`filter-tab${activeTab === 'type:image' ? ' filter-tab--active' : ''}`}
+                  onClick={() => setActiveTab('type:image')}
+                >🖼️ Images</button>
+
+                {allCategories.length > 0 && <div className="filter-divider"></div>}
+
+                {allCategories.map((cat) => (
+                  <button
+                    key={cat} type="button" role="tab"
+                    className={`filter-tab${activeTab === cat ? ' filter-tab--active' : ''}`}
+                    onClick={() => setActiveTab(cat)}
+                  >{cat}</button>
+                ))}
+              </div>
+              
+              {(activeTab !== 'all' || searchTerm) && (
+                <button 
+                  type="button" 
+                  className="filter-reset-btn"
+                  onClick={() => { setActiveTab('all'); setSearchTerm(''); }}
+                >Reset All</button>
+              )}
             </div>
 
             {/* Notes list */}
@@ -566,8 +613,16 @@ function Dashboard() {
             ) : visibleNotes.length === 0 ? (
               <AppState
                 variant="empty"
-                title="No notes match"
-                description="Try a different search term or switch the filter tab."
+                title={searchTerm ? "No results found" : "Nothing to show"}
+                description={
+                  searchTerm 
+                    ? `We couldn't find anything matching "${searchTerm}". Try different keywords.`
+                    : activeTab === 'favorites'
+                      ? "You haven't favorited any notes yet. Click the star on a card to add it here."
+                      : "No notes match this filter. Try selecting a different category or type."
+                }
+                actionLabel={searchTerm || activeTab !== 'all' ? "Clear filters" : undefined}
+                onAction={() => { setSearchTerm(''); setActiveTab('all'); }}
               />
             ) : (
               <div className="notes-grid">

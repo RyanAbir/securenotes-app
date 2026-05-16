@@ -1,93 +1,73 @@
-# SecureNotes
+# 🔐 SecureNotes
 
-SecureNotes is a full-stack MERN notes app with user authentication, JWT-protected routes, and user-specific CRUD notes.
+**SecureNotes** is a modern, colorful, and highly organized note-taking application designed for individuals who value both security and aesthetics. Built with the MERN stack, it offers a seamless writing experience with rich text support, dynamic checklists, and image attachments, all wrapped in a premium SaaS-inspired dark theme.
 
-## Features
+![SecureNotes Banner](https://placehold.co/1200x600/09090b/fafafa?text=SecureNotes+Dashboard)
 
-- Register and login
-- JWT authentication
-- Protected dashboard
-- Create notes
-- Edit notes
-- Delete notes
-- User-specific notes
-- Tag filtering, note sorting, favorites
-- Session expiry handling with auto logout
+## ✨ Key Features
 
-## Tech Stack
+- **🎨 Vibrant Organization**: Categorize notes using an 8-color palette and custom tags.
+- **📝 Multi-Format Support**:
+    - **Rich Text**: Advanced editor with headings, lists, and code blocks (React Quill).
+    - **Checklists**: Interactive todo lists with real-time progress tracking.
+    - **Images**: Attach visual context to your thoughts (supports drag-and-drop).
+- **📌 Smart Management**: Pin important notes and favorite your most-used items.
+- **🔍 Advanced Search & Filter**: Instant search across titles, content, tags, and even checklist items. Filter by type (Text, Checklist, Image) or category.
+- **🧱 Masonry Layout**: Dynamic, responsive grid that beautifully adapts to any screen size.
+- **🔒 Secure Architecture**: Robust JWT-based authentication and secure password hashing.
+- **🌙 Premium Dark UI**: Meticulously crafted dark mode with high-contrast typography and subtle micro-animations.
 
-- React + Vite
-- Node.js + Express
-- MongoDB Atlas
-- JWT + bcryptjs
-- Render
-- Vercel
+## 🛠️ Tech Stack
 
-## Live Demo
+- **Frontend**: React (Vite), React Router, React Quill, DOMPurify, CSS3 (Vanilla)
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB (Mongoose)
+- **Authentication**: JSON Web Tokens (JWT), BcryptJS
+- **Styling**: Modern CSS Variables, Masonry (Column-count)
 
-- Frontend: [Add your Vercel frontend link here](https://vercel.com/)
-- Backend: [https://securenotes-backend-jcor.onrender.com](https://securenotes-backend-jcor.onrender.com)
+## 🚀 Getting Started
 
-## API Endpoints
+### Prerequisites
+- Node.js (v18+)
+- MongoDB (Local or Atlas)
 
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/notes`
-- `POST /api/notes`
-- `PUT /api/notes/:id`
-- `DELETE /api/notes/:id`
+### Installation
 
-## Local Setup
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/RyanAbir/securenotes-app.git
+   cd securenotes-app
+   ```
 
-### Backend
+2. **Backend Setup**:
+   ```bash
+   cd backend
+   npm install
+   # Create .env based on .env.example and add your MongoDB URI and JWT Secret
+   npm start
+   ```
 
-```bash
-cd backend
-npm install
-```
+3. **Frontend Setup**:
+   ```bash
+   cd ../frontend
+   npm install
+   # Update VITE_API_URL in your .env if different from default
+   npm run dev
+   ```
 
-Create a `.env` file in `backend/` with:
+## 📋 Environment Variables
 
-```env
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=replace_with_a_long_random_secret_at_least_32_characters
-FRONTEND_URL=http://localhost:5173
-PORT=5000
-```
+Refer to [.env.example](.env.example) for the required configuration.
 
-Security notes:
-- Use a long random `JWT_SECRET` in production.
-- Do not reuse development secrets in Render or other deployed environments.
-- `FRONTEND_URL` should match the deployed frontend origin exactly.
+## 🗺️ Roadmap
+- [ ] Multi-select batch actions (delete/archive).
+- [ ] Shareable public note links.
+- [ ] Export notes to PDF/Markdown.
+- [ ] Mobile app version (React Native).
 
-Start the backend:
+## 👨‍💻 Author
+**Ryan Abir**
+- GitHub: [@RyanAbir](https://github.com/RyanAbir)
 
-```bash
-npm start
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Create a `.env` file in `frontend/` with:
-
-```env
-VITE_API_URL=http://localhost:5000
-```
-
-Production environment notes:
-- Render backend should define:
-  - `MONGO_URI`
-  - `JWT_SECRET`
-  - `FRONTEND_URL`
-- Vercel frontend should define:
-  - `VITE_API_URL`
-
-## Author
-
-Ryan Abir
+---
+*Built for the Modern Web — Secure, Colorful, and Fast.*

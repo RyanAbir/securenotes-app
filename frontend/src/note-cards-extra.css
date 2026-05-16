@@ -132,11 +132,6 @@
   transition: color 0.15s ease, text-decoration 0.15s ease;
 }
 
-.todo-editor-input::placeholder {
-  color: var(--text);
-  opacity: 0.5;
-}
-
 .todo-editor-input--done {
   color: var(--text);
   text-decoration: line-through;
@@ -177,23 +172,54 @@
   cursor: pointer;
   padding: 4px 0;
   margin-top: 4px;
-  transition: opacity 0.15s ease;
-}
-
-.todo-add-btn:hover {
-  opacity: 0.75;
 }
 
 /* ============================================
-   Filter Tab Bar
+   Search UI Improvements
    ============================================ */
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  opacity: 0.5;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.search-clear-btn:hover {
+  opacity: 1;
+  color: var(--text-h);
+}
+
+/* ============================================
+   Filter Tab Bar & Container
+   ============================================ */
+
+.filter-tabs-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
 
 .filter-tabs {
   display: flex;
+  align-items: center;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
-  margin-bottom: 20px;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -207,15 +233,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 6px 14px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
   white-space: nowrap;
 }
 
@@ -223,7 +248,6 @@
   background: var(--accent-bg);
   border-color: var(--accent-border);
   color: var(--text-h);
-  transform: translateY(-1px);
 }
 
 .filter-tab--active {
@@ -233,14 +257,34 @@
   font-weight: 600;
 }
 
-.filter-tab--active:hover {
-  background: var(--text-h);
-  color: var(--bg);
-  transform: translateY(-1px);
+.filter-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+.filter-reset-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-reset-btn:hover {
+  background: var(--bg);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 /* ============================================
-   Note Card: text content
+   Note Card Content
    ============================================ */
 
 .note-card-title-row {
@@ -253,7 +297,6 @@
 .note-type-badge {
   flex-shrink: 0;
   font-size: 14px;
-  line-height: 1;
 }
 
 .note-card-content {
@@ -375,7 +418,6 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .todo-checkbox--checked {
@@ -388,7 +430,6 @@
   font-size: 14px;
   line-height: 1.4;
   color: var(--text-h);
-  transition: opacity 0.15s ease;
 }
 
 .todo-more {
@@ -400,26 +441,17 @@
 }
 
 /* ============================================
-   Masonry grid responsive breakpoints
+   Responsive
    ============================================ */
 
-@media (max-width: 1024px) {
-  .notes-grid {
-    columns: 2 200px;
-    column-gap: 16px;
-  }
-}
-
 @media (max-width: 640px) {
-  .notes-grid {
-    columns: 1;
+  .filter-tabs-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
-
+  
   .filter-tabs {
-    margin-bottom: 16px;
-  }
-
-  .note-type-tabs {
-    gap: 6px;
+    padding-bottom: 4px;
   }
 }
