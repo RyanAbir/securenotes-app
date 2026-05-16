@@ -73,13 +73,13 @@ body {
 h1,
 h2 {
   font-family: var(--heading);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-h);
 }
 
 h1 {
   font-size: 56px;
-  letter-spacing: -1.68px;
+  letter-spacing: -0.02em;
   margin: 32px 0;
   @media (max-width: 1024px) {
     font-size: 36px;
@@ -134,8 +134,9 @@ code {
   width: min(100%, 440px);
   padding: 32px;
   border: 1px solid var(--border);
-  border-radius: 28px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(12px);
   box-shadow: var(--shadow);
   text-align: left;
 }
@@ -186,16 +187,17 @@ code {
 .auth-field input {
   width: 100%;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 12px 16px;
   background: var(--bg);
   color: var(--text-h);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .auth-field input:focus {
   outline: 2px solid transparent;
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px var(--accent-bg);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
 .auth-input-error {
@@ -301,8 +303,9 @@ code {
 .dashboard-panel {
   padding: 24px;
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
   box-shadow: var(--shadow);
   text-align: left;
 }
@@ -358,8 +361,9 @@ code {
 .dashboard-field textarea {
   width: 100%;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   background: var(--bg);
   color: var(--text-h);
   resize: vertical;
@@ -438,7 +442,7 @@ code {
   min-height: 220px;
   padding: 24px;
   border: 1px dashed var(--border);
-  border-radius: 18px;
+  border-radius: 20px;
   text-align: center;
   align-content: center;
 }
@@ -605,7 +609,7 @@ code {
   }
 
   .auth-card {
-    padding: 24px 18px;
+    padding: 24px 20px;
     border-radius: 22px;
   }
 
@@ -628,7 +632,7 @@ code {
   }
 
   .dashboard-panel {
-    padding: 18px;
+    padding: 20px;
     border-radius: 20px;
   }
 
