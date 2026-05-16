@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
+import '../quill-overrides.css'
 import DOMPurify from 'dompurify'
 import AppState from '../components/AppState'
 import { API_URL } from '../config/api'
@@ -27,7 +28,18 @@ function Dashboard() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [tags, setTags] = useState('')
+  const [editingNoteId, setEditingNoteId] = useState(null)
   const navigate = useNavigate()
+
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['code-block'],
+      ['clean'],
+    ],
+  }
 
   const authUser = getStoredAuthUser()
   const userLabel = authUser?.name || authUser?.email || 'Signed in user'
@@ -73,32 +85,63 @@ function Dashboard() {
     event.preventDefault()
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/notes`,
-        {
-        method: 'POST',
+      const url = editingNoteId
+        ? `${API_URL}/api/notes/${editingNoteId}`
+        : `${API_URL}/api/notes`
+      
+      const method = editingNoteId ? 'PUT' : 'POST'
+      
+      const payload = { title, content, tags: parseTags(tags) }
+      
+      if (editingNoteId) {
+        const existingNote = notes.find((n) => n._id === editingNoteId)
+        if (existingNote) {
+          payload.pinned = existingNote.pinned
+          payload.favorite = existingNote.favorite
+        }
+      }
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ title, content, tags: parseTags(tags) }),
-        }
-      )
+        body: JSON.stringify(payload),
+      })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create note')
+        throw new Error(data.message || `Failed to ${editingNoteId ? 'update' : 'create'} note`)
       }
 
       setTitle('')
       setContent('')
       setTags('')
-      setNotes((currentNotes) => [data.data, ...currentNotes])
-      toast.success('Note created')
+      
+      if (editingNoteId) {
+        setNotes((currentNotes) =>
+          currentNotes.map((currentNote) =>
+            currentNote._id === editingNoteId ? data.data : currentNote
+          )
+        )
+        setEditingNoteId(null)
+        toast.success('Note updated')
+      } else {
+        setNotes((currentNotes) => [data.data, ...currentNotes])
+        toast.success('Note created')
+      }
     } catch (error) {
       toast.error(error.message)
     }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingNoteId(null)
+    setTitle('')
+    setContent('')
+    setTags('')
   }
 
   const handleDelete = async (id) => {
@@ -132,62 +175,12 @@ function Dashboard() {
     }
   }
 
-  const handleEdit = async (note) => {
-    const nextTitle = window.prompt('Enter new title', note.title)
-
-    if (nextTitle === null) {
-      return
-    }
-
-    const nextContent = window.prompt('Enter new content', note.content)
-
-    if (nextContent === null) {
-      return
-    }
-
-    const nextTags = window.prompt(
-      'Enter tags as comma-separated values',
-      formatTags(note.tags || [])
-    )
-
-    if (nextTags === null) {
-      return
-    }
-
-    try {
-      const response = await fetch(
-        `${API_URL}/api/notes/${note._id}`,
-        {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: nextTitle,
-          content: nextContent,
-          tags: parseTags(nextTags),
-          pinned: Boolean(note.pinned),
-          favorite: Boolean(note.favorite),
-        }),
-        }
-      )
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update note')
-      }
-
-      setNotes((currentNotes) =>
-        currentNotes.map((currentNote) =>
-          currentNote._id === note._id ? data.data : currentNote
-        )
-      )
-      toast.success('Note updated')
-    } catch (error) {
-      toast.error(error.message)
-    }
+  const handleEdit = (note) => {
+    setEditingNoteId(note._id)
+    setTitle(note.title)
+    setContent(note.content)
+    setTags(formatTags(note.tags || []))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleTogglePinned = async (note) => {
@@ -346,8 +339,8 @@ function Dashboard() {
         <section className="dashboard-grid">
           <div className="dashboard-panel dashboard-form-panel">
             <div className="dashboard-section-header">
-              <h2>Create a note</h2>
-              <p>Write something important and keep it organized.</p>
+              <h2>{editingNoteId ? 'Update note' : 'Create a note'}</h2>
+              <p>{editingNoteId ? 'Make changes to your selected note.' : 'Write something important and keep it organized.'}</p>
             </div>
             <form className="dashboard-form" onSubmit={handleSubmit}>
               <label className="dashboard-field">
@@ -362,12 +355,12 @@ function Dashboard() {
               </label>
               <label className="dashboard-field">
                 <span>Content</span>
-                <textarea
-                  placeholder="Add your note details here"
+                <ReactQuill
+                  theme="snow"
+                  modules={modules}
                   value={content}
-                  onChange={(event) => setContent(event.target.value)}
-                  required
-                  rows="6"
+                  onChange={setContent}
+                  placeholder="Add your note details here"
                 />
               </label>
               <label className="dashboard-field">
@@ -379,9 +372,20 @@ function Dashboard() {
                   onChange={(event) => setTags(event.target.value)}
                 />
               </label>
-              <button type="submit" className="dashboard-button dashboard-button-primary">
-                Add Note
-              </button>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button type="submit" className="dashboard-button dashboard-button-primary">
+                  {editingNoteId ? 'Update Note' : 'Add Note'}
+                </button>
+                {editingNoteId && (
+                  <button
+                    type="button"
+                    className="dashboard-button dashboard-button-secondary"
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
             </form>
           </div>
 

@@ -87,7 +87,7 @@ h1 {
   }
 }
 h2 {
-  font-size: 24px;
+  font-size: 28px;
   line-height: 118%;
   letter-spacing: -0.24px;
   margin: 0 0 8px;
@@ -460,8 +460,8 @@ code {
 .app-state-icon {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   border-radius: 999px;
   border: 1px solid var(--accent-border);
   background: var(--accent-bg);
