@@ -648,8 +648,18 @@ code {
   }
 
   .dashboard-panel {
-    padding: 16px;
+    padding: 12px;
     border-radius: 16px;
+  }
+
+  .dashboard-field {
+    margin-bottom: 16px;
+    gap: 6px;
+  }
+
+  .dashboard-field input,
+  .dashboard-field textarea {
+    padding: 10px 12px;
   }
 
   .dashboard-toolbar {

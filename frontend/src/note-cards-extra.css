@@ -97,6 +97,12 @@
   gap: 8px;
 }
 
+@media (max-width: 480px) {
+  .todo-editor-row {
+    gap: 6px;
+  }
+}
+
 .todo-check-btn {
   flex-shrink: 0;
   width: 22px;

@@ -19,7 +19,7 @@
 
 @media (max-width: 480px) {
   .ql-toolbar.ql-snow {
-    padding: 8px !important;
+    padding: 6px 4px !important;
   }
 }
 
@@ -56,7 +56,7 @@
 }
 
 .ql-toolbar.ql-snow .ql-formats {
-  margin-right: 10px;
+  margin-right: 6px;
 }
 
 .ql-editor h1 { font-size: 24px; font-weight: 600; margin: 16px 0 8px; }
