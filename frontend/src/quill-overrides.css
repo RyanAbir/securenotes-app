@@ -5,6 +5,8 @@
    ============================================ */
 
 .ql-toolbar.ql-snow {
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--border) !important;
   border-bottom: none !important;
   border-top-left-radius: 12px;
@@ -15,15 +17,62 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: 480px) {
   .ql-toolbar.ql-snow {
     padding: 6px 4px !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 430px) {
+  .ql-toolbar.ql-snow {
+    padding: 4px !important;
+    gap: 2px;
+  }
+}
+
+.ql-toolbar.ql-snow .ql-formats {
+  display: flex;
+  gap: 6px;
+  margin-right: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+@media (max-width: 430px) {
+  .ql-toolbar.ql-snow .ql-formats {
+    gap: 3px;
+    margin-right: 3px;
+  }
+}
+
+.ql-toolbar.ql-snow button,
+.ql-toolbar.ql-snow .ql-picker {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 6px;
+}
+
+@media (max-width: 430px) {
+  .ql-toolbar.ql-snow button,
+  .ql-toolbar.ql-snow .ql-picker {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 4px;
   }
 }
 
 .ql-container.ql-snow {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--border) !important;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
@@ -33,10 +82,20 @@
 }
 
 .ql-editor {
+  max-width: 100%;
   min-height: 180px;
   padding: 16px !important;
   color: var(--text-h);
   line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 430px) {
+  .ql-editor {
+    min-height: 140px;
+    padding: 10px !important;
+    font-size: 15px;
+  }
 }
 
 .ql-editor.ql-blank::before {
