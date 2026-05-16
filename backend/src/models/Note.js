@@ -49,6 +49,10 @@ const noteSchema = new mongoose.Schema(
       type: String,
       default: "default",
     },
+    imageUrl: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

@@ -21,6 +21,21 @@ const normalizeTodos = (todos) => {
     }));
 };
 
+// Accept a data URI (base64) or a plain https URL; reject anything else
+const normalizeImageUrl = (value) => {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (trimmed === "") return "";
+  if (
+    trimmed.startsWith("data:image/") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("http://")
+  ) {
+    return trimmed;
+  }
+  return undefined; // reject suspicious values
+};
+
 const getNotes = async (req, res, next) => {
   try {
     const notes = await Note.find({ user: req.user }).sort({
@@ -35,7 +50,8 @@ const getNotes = async (req, res, next) => {
 
 const createNote = async (req, res, next) => {
   try {
-    const { title, content, type, todos, tags, pinned, favorite, color } = req.body;
+    const { title, content, type, todos, tags, pinned, favorite, color, imageUrl } =
+      req.body;
 
     if (!title) {
       return res.status(400).json({ message: "Please provide a title" });
@@ -58,6 +74,9 @@ const createNote = async (req, res, next) => {
     if (typeof favorite === "boolean") noteData.favorite = favorite;
     if (typeof color === "string" && color.length > 0) noteData.color = color;
 
+    const normalizedImage = normalizeImageUrl(imageUrl);
+    if (normalizedImage !== undefined) noteData.imageUrl = normalizedImage;
+
     const note = await Note.create(noteData);
     return res.status(201).json({ success: true, data: note });
   } catch (error) {
@@ -68,7 +87,8 @@ const createNote = async (req, res, next) => {
 const updateNote = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, content, type, todos, tags, pinned, favorite, color } = req.body;
+    const { title, content, type, todos, tags, pinned, favorite, color, imageUrl } =
+      req.body;
 
     const note = await Note.findById(id);
     if (!note) return res.status(404).json({ message: "Note not found" });
@@ -88,6 +108,9 @@ const updateNote = async (req, res, next) => {
     if (typeof pinned === "boolean") note.pinned = pinned;
     if (typeof favorite === "boolean") note.favorite = favorite;
     if (typeof color === "string" && color.length > 0) note.color = color;
+
+    const normalizedImage = normalizeImageUrl(imageUrl);
+    if (normalizedImage !== undefined) note.imageUrl = normalizedImage;
 
     const updatedNote = await note.save();
     return res.json({ success: true, data: updatedNote });

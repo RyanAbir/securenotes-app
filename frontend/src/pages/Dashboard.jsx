@@ -5,8 +5,11 @@ import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import '../quill-overrides.css'
 import '../note-cards-extra.css'
+import '../image-upload.css'
 import DOMPurify from 'dompurify'
 import AppState from '../components/AppState'
+import ImageUploader from '../components/ImageUploader'
+import NoteImage from '../components/NoteImage'
 import { API_URL } from '../config/api'
 import { clearAuthSession, getStoredAuthUser, getStoredToken } from '../utils/auth'
 import { NOTE_COLORS, getNoteColor } from '../note-colors'
@@ -60,6 +63,7 @@ function Dashboard() {
   const [todoItems, setTodoItems] = useState([makeTodoItem()])
   const [tags, setTags] = useState('')
   const [noteColor, setNoteColor] = useState('default')
+  const [imageUrl, setImageUrl] = useState('')
   const [editingNoteId, setEditingNoteId] = useState(null)
 
   const navigate = useNavigate()
@@ -97,6 +101,7 @@ function Dashboard() {
     setTodoItems([makeTodoItem()])
     setTags('')
     setNoteColor('default')
+    setImageUrl('')
   }
 
   const buildPayload = (extraFields = {}) => ({
@@ -108,6 +113,7 @@ function Dashboard() {
       : [],
     tags: parseTags(tags),
     color: noteColor,
+    imageUrl,
     ...extraFields,
   })
 
@@ -179,6 +185,7 @@ function Dashboard() {
     )
     setTags(formatTags(note.tags || []))
     setNoteColor(note.color || 'default')
+    setImageUrl(note.imageUrl || '')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -194,6 +201,7 @@ function Dashboard() {
           todos: Array.isArray(note.todos) ? note.todos : [],
           tags: Array.isArray(note.tags) ? note.tags : [],
           color: note.color || 'default',
+          imageUrl: note.imageUrl || '',
           pinned: field === 'pinned' ? !note.pinned : Boolean(note.pinned),
           favorite: field === 'favorite' ? !note.favorite : Boolean(note.favorite),
         }),
@@ -208,12 +216,10 @@ function Dashboard() {
     }
   }
 
-  // Inline todo completion toggle (optimistic, then persisted)
   const handleToggleTodoItem = async (note, itemId) => {
     const updatedTodos = (note.todos || []).map((item) =>
       item.id === itemId ? { ...item, completed: !item.completed } : item
     )
-    // Optimistic update
     setNotes((cur) =>
       cur.map((n) => (n._id === note._id ? { ...n, todos: updatedTodos } : n))
     )
@@ -228,6 +234,7 @@ function Dashboard() {
           todos: updatedTodos,
           tags: Array.isArray(note.tags) ? note.tags : [],
           color: note.color || 'default',
+          imageUrl: note.imageUrl || '',
           pinned: Boolean(note.pinned),
           favorite: Boolean(note.favorite),
         }),
@@ -237,7 +244,6 @@ function Dashboard() {
       setNotes((cur) => cur.map((n) => (n._id === note._id ? data.data : n)))
     } catch (err) {
       toast.error(err.message)
-      // Revert optimistic
       setNotes((cur) =>
         cur.map((n) => (n._id === note._id ? { ...n, todos: note.todos } : n))
       )
@@ -323,7 +329,7 @@ function Dashboard() {
             <p className="dashboard-eyebrow">Dashboard</p>
             <h1>Your secure workspace</h1>
             <p className="dashboard-subtitle">
-              Capture notes and checklists, manage them from one place.
+              Capture notes, checklists, and images — all in one place.
             </p>
           </div>
         </section>
@@ -333,7 +339,11 @@ function Dashboard() {
           <div className="dashboard-panel dashboard-form-panel">
             <div className="dashboard-section-header">
               <h2>{editingNoteId ? 'Update note' : 'Create a note'}</h2>
-              <p>{editingNoteId ? 'Make changes to your selected note.' : 'Write something important and keep it organized.'}</p>
+              <p>
+                {editingNoteId
+                  ? 'Make changes to your selected note.'
+                  : 'Write something important and keep it organized.'}
+              </p>
             </div>
 
             <form className="dashboard-form" onSubmit={handleSubmit}>
@@ -411,16 +421,18 @@ function Dashboard() {
                         )}
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      className="todo-add-btn"
-                      onClick={addTodoItem}
-                    >
+                    <button type="button" className="todo-add-btn" onClick={addTodoItem}>
                       + Add item
                     </button>
                   </div>
                 </div>
               )}
+
+              {/* Image upload */}
+              <div className="dashboard-field">
+                <span>Attach image <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></span>
+                <ImageUploader value={imageUrl} onChange={setImageUrl} />
+              </div>
 
               <label className="dashboard-field">
                 <span>Category / Tags</span>
@@ -454,7 +466,11 @@ function Dashboard() {
                   {editingNoteId ? 'Update Note' : 'Add Note'}
                 </button>
                 {editingNoteId && (
-                  <button type="button" className="dashboard-button dashboard-button-secondary" onClick={resetForm}>
+                  <button
+                    type="button"
+                    className="dashboard-button dashboard-button-secondary"
+                    onClick={resetForm}
+                  >
                     Cancel
                   </button>
                 )}
@@ -466,7 +482,9 @@ function Dashboard() {
           <section className="dashboard-panel dashboard-notes-panel">
             <div className="dashboard-section-header">
               <h2>Your notes</h2>
-              <p>{visibleNotes.length} visible note{visibleNotes.length === 1 ? '' : 's'}</p>
+              <p>
+                {visibleNotes.length} visible note{visibleNotes.length === 1 ? '' : 's'}
+              </p>
             </div>
 
             {/* Search + Sort */}
@@ -494,43 +512,76 @@ function Dashboard() {
             {/* Filter tabs */}
             <div className="filter-tabs" role="tablist">
               <button
-                type="button" role="tab"
+                type="button"
+                role="tab"
                 className={`filter-tab${activeTab === 'all' ? ' filter-tab--active' : ''}`}
                 onClick={() => setActiveTab('all')}
-              >All</button>
+              >
+                All
+              </button>
               {hasFavorites && (
                 <button
-                  type="button" role="tab"
+                  type="button"
+                  role="tab"
                   className={`filter-tab${activeTab === 'favorites' ? ' filter-tab--active' : ''}`}
                   onClick={() => setActiveTab('favorites')}
-                >★ Favorites</button>
+                >
+                  ★ Favorites
+                </button>
               )}
               {allCategories.map((cat) => (
                 <button
-                  key={cat} type="button" role="tab"
+                  key={cat}
+                  type="button"
+                  role="tab"
                   className={`filter-tab${activeTab === cat ? ' filter-tab--active' : ''}`}
                   onClick={() => setActiveTab(cat)}
-                >{cat}</button>
+                >
+                  {cat}
+                </button>
               ))}
             </div>
 
             {/* Notes list */}
             {loading ? (
-              <AppState variant="loading" title="Loading notes" description="Fetching your latest notes from the server." />
+              <AppState
+                variant="loading"
+                title="Loading notes"
+                description="Fetching your latest notes from the server."
+              />
             ) : notesError ? (
-              <AppState variant="error" title="Could not load notes" description={notesError} actionLabel="Try again" onAction={fetchNotes} />
+              <AppState
+                variant="error"
+                title="Could not load notes"
+                description={notesError}
+                actionLabel="Try again"
+                onAction={fetchNotes}
+              />
             ) : notes.length === 0 ? (
-              <AppState variant="empty" title="No notes yet" description="Create your first note to start building your private workspace." />
+              <AppState
+                variant="empty"
+                title="No notes yet"
+                description="Create your first note to start building your private workspace."
+              />
             ) : visibleNotes.length === 0 ? (
-              <AppState variant="empty" title="No notes match" description="Try a different search term or switch the filter tab." />
+              <AppState
+                variant="empty"
+                title="No notes match"
+                description="Try a different search term or switch the filter tab."
+              />
             ) : (
               <div className="notes-grid">
                 {visibleNotes.map((note) => {
                   const isTodo = note.type === 'todo'
+                  const hasImage = Boolean(note.imageUrl)
                   const palette = getNoteColor(note.color || 'default')
                   const isColored = note.color && note.color !== 'default'
                   const cardStyle = isColored
-                    ? { background: palette.cardBg, borderColor: palette.cardBorder, color: palette.textColor }
+                    ? {
+                        background: palette.cardBg,
+                        borderColor: palette.cardBorder,
+                        color: palette.textColor,
+                      }
                     : {}
 
                   const completedCount = isTodo
@@ -541,20 +592,41 @@ function Dashboard() {
                   return (
                     <article
                       key={note._id}
-                      className={`note-card${isColored ? ' note-card--colored' : ''}${isTodo ? ' note-card--todo' : ''}`}
+                      className={[
+                        'note-card',
+                        isColored ? 'note-card--colored' : '',
+                        isTodo ? 'note-card--todo' : '',
+                        hasImage ? 'note-card--has-image' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                       style={cardStyle}
                     >
+                      {/* Card image (above body) */}
+                      {hasImage && <NoteImage src={note.imageUrl} alt={note.title} />}
+
                       <div className="note-card-body">
                         <div className="note-card-header">
                           <div className="note-card-title-row">
                             {isTodo && <span className="note-type-badge">✅</span>}
+                            {hasImage && !isTodo && (
+                              <span className="note-type-badge">🖼️</span>
+                            )}
                             <h2 style={isColored ? { color: palette.textColor } : {}}>
                               {note.title}
                             </h2>
                           </div>
                           <div className="note-badges">
-                            {note.favorite && <span className="note-badge note-badge-favorite" title="Favorite">★</span>}
-                            {note.pinned && <span className="note-badge" title="Pinned">📌</span>}
+                            {note.favorite && (
+                              <span className="note-badge note-badge-favorite" title="Favorite">
+                                ★
+                              </span>
+                            )}
+                            {note.pinned && (
+                              <span className="note-badge" title="Pinned">
+                                📌
+                              </span>
+                            )}
                           </div>
                         </div>
 
@@ -564,16 +636,24 @@ function Dashboard() {
                               <div className="todo-progress">
                                 <div
                                   className="todo-progress-bar"
-                                  style={{ width: `${Math.round((completedCount / totalCount) * 100)}%` }}
+                                  style={{
+                                    width: `${Math.round((completedCount / totalCount) * 100)}%`,
+                                  }}
                                 />
                               </div>
                             )}
-                            <p className="todo-count" style={isColored ? { color: palette.textColor, opacity: 0.7 } : {}}>
+                            <p
+                              className="todo-count"
+                              style={isColored ? { color: palette.textColor, opacity: 0.7 } : {}}
+                            >
                               {completedCount} / {totalCount} completed
                             </p>
                             <ul className="todo-list">
                               {(note.todos || []).slice(0, 6).map((item) => (
-                                <li key={item.id} className={`todo-item${item.completed ? ' todo-item--done' : ''}`}>
+                                <li
+                                  key={item.id}
+                                  className={`todo-item${item.completed ? ' todo-item--done' : ''}`}
+                                >
                                   <button
                                     type="button"
                                     className={`todo-checkbox${item.completed ? ' todo-checkbox--checked' : ''}`}
@@ -592,7 +672,12 @@ function Dashboard() {
                                 </li>
                               ))}
                               {totalCount > 6 && (
-                                <li className="todo-more" style={isColored ? { color: palette.textColor, opacity: 0.6 } : {}}>
+                                <li
+                                  className="todo-more"
+                                  style={
+                                    isColored ? { color: palette.textColor, opacity: 0.6 } : {}
+                                  }
+                                >
                                   +{totalCount - 6} more items
                                 </li>
                               )}
@@ -601,7 +686,9 @@ function Dashboard() {
                         ) : (
                           <div
                             className="note-card-content"
-                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content || '') }}
+                            dangerouslySetInnerHTML={{
+                              __html: DOMPurify.sanitize(note.content || ''),
+                            }}
                           />
                         )}
 
@@ -611,7 +698,11 @@ function Dashboard() {
                               <span
                                 key={`${note._id}-${tag}`}
                                 className="note-tag"
-                                style={isColored ? { background: 'rgba(0,0,0,0.1)', color: palette.textColor } : {}}
+                                style={
+                                  isColored
+                                    ? { background: 'rgba(0,0,0,0.1)', color: palette.textColor }
+                                    : {}
+                                }
                               >
                                 {tag}
                               </span>
@@ -621,16 +712,32 @@ function Dashboard() {
                       </div>
 
                       <div className="note-card-actions">
-                        <button type="button" className="dashboard-button dashboard-button-secondary" onClick={() => handleToggle(note, 'favorite')}>
+                        <button
+                          type="button"
+                          className="dashboard-button dashboard-button-secondary"
+                          onClick={() => handleToggle(note, 'favorite')}
+                        >
                           {note.favorite ? 'Unfavorite' : 'Favorite'}
                         </button>
-                        <button type="button" className="dashboard-button dashboard-button-secondary" onClick={() => handleToggle(note, 'pinned')}>
+                        <button
+                          type="button"
+                          className="dashboard-button dashboard-button-secondary"
+                          onClick={() => handleToggle(note, 'pinned')}
+                        >
                           {note.pinned ? 'Unpin' : 'Pin'}
                         </button>
-                        <button type="button" className="dashboard-button dashboard-button-secondary" onClick={() => handleEdit(note)}>
+                        <button
+                          type="button"
+                          className="dashboard-button dashboard-button-secondary"
+                          onClick={() => handleEdit(note)}
+                        >
                           Edit
                         </button>
-                        <button type="button" className="dashboard-button dashboard-button-danger" onClick={() => handleDelete(note._id)}>
+                        <button
+                          type="button"
+                          className="dashboard-button dashboard-button-danger"
+                          onClick={() => handleDelete(note._id)}
+                        >
                           Delete
                         </button>
                       </div>
